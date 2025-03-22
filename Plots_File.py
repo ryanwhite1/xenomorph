@@ -16,10 +16,9 @@ from scipy.ndimage import gaussian_filter
 import jax.scipy.signal as signal
 from matplotlib import animation
 import time
-import emcee
 
-import WR_Geom_Model as gm
-import WR_binaries as wrb
+import xenomorph.systems as wrb
+import xenomorph.geometry as gm
 
 # set LaTeX font for our figures
 plt.rcParams.update({"text.usetex": True})
@@ -1703,7 +1702,106 @@ def WR104_proposal_plot():
     fig.savefig('Images/WR104.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/WR104.pdf', dpi=400, bbox_inches='tight')
     
+
+def poster_plot():
+
+    starcopy = wrb.WR104.copy()
     
+    starcopy['m1'] = starcopy['m2'] = 50
+    starcopy['eccentricity'] = 0.
+    starcopy['open_angle'] = 90
+    starcopy['inclination'] = 30
+    starcopy['asc_node'] = 0
+    starcopy['arg_peri'] = 200
+    starcopy['windspeed1'] = 500
+    # starcopy['phase'] = 0.6 
+    
+    starcopy['histmax'] = 0.5
+    
+    
+    pos1, pos2 = gm.orbital_positions(starcopy)
+    pos1, pos2 = gm.transform_orbits(pos1, pos2, starcopy)
+    
+    
+    particles, weights = gm.gui_funcs[0](starcopy)
+    X, Y, H = smooth_histogram2d(particles, weights, starcopy)
+    # H = gm.add_stars(X[0, :], Y[:, 0], H, starcopy)
+    
+    fig, ax = plt.subplots(figsize=(6, 6))
+    
+    ax.set_axis_off()
+    # ax.plot(pos1[0, :], pos1[1, :])
+    ax.pcolormesh(X, Y, H, cmap='gist_heat_r', rasterized=True)
+    ax.set(aspect='equal')
+    
+    every = 50
+    start, end = int(len(weights) * 0.2), int(len(weights) * 0.4)
+    alphas = weights[start:end:every] * (1 - np.linspace(0, 1, len(weights[start:end:every]))**0.2)
+    ax.scatter(particles[0, start:end:every], particles[1, start:end:every], alpha=alphas)
+    
+    fig.savefig('Images/Poster_Plot.png', dpi=400, bbox_inches='tight')
+    # fig.savefig('Images/Poster_Plot.pdf', dpi=400, bbox_inches='tight')
+    
+    
+    
+    
+    # # now for 2nd figure
+    
+    # starcopy['inclination'] = 0
+    # starcopy['phase'] = 0.  
+    # starcopy['arg_peri'] = 180
+    # starcopy['windspeed1'] = 50
+    # starcopy['histmax'] = 1
+    
+    # fig, ax = plt.subplots(figsize=(4, 4))
+    
+    # pos1, pos2 = gm.orbital_positions(starcopy)
+    # pos1, pos2 = gm.transform_orbits(pos1, pos2, starcopy)
+    
+    # particles, weights = gm.gui_funcs[0](starcopy)
+    
+    # last = int(2e5)
+    
+    
+    # particles = particles[:, -last:]
+    # weights = weights[-last:]
+    
+    # # weights = weights[::-1]
+    # # weights *= np.linspace(0, 1, len(weights))
+    
+    # X, Y, H = smooth_histogram2d(particles, weights, starcopy)
+    
+    # ax.pcolormesh(X, Y, H, cmap='gist_heat_r', rasterized=True)
+    # ax.set(aspect='equal')
+    
+    # line = ax.plot(pos1[0, :], pos1[1, :], ls='--')
+    # ax.scatter([pos1[0, -1], pos2[0, -1]], [pos1[1, -1], pos2[1, -1]],
+    #             c = ['k', 'tab:blue'])
+    
+    # for sign in [1, -1]:
+    #     ax.arrow(0 + sign * 1e-4, sign * 0.00067, dx = -sign * 5e-5, dy=0, width=5e-5,
+    #              shape='full', lw=0)
+    
+    # y = np.linspace(-1, 1, 100)
+    # x = y**2
+    # factor = 1e-3
+    # shift = -0.0005
+    # ax.plot(-x * factor * 1.1 + shift, y * factor, c='k', alpha=0.5)
+    
+    # ax.text(0.0009, 0, "WR Star")
+    # ax.text(-0.0012, 0, "OB")
+    # ax.text(-0.0012, 0.001, "Wind Shock")
+    
+    # ax.errorbar([-0.0011], [-0.0015], xerr=0.0005, capsize=5, c='k', alpha=0.5)
+    # ax.text(-0.00212, -0.002, "Nucleation Distance")
+    
+    # ax.set_xlim(xmin=-0.0025)
+    # ax.set_ylim(ymin=-0.0025)
+    
+    # ax.set_axis_off()
+    
+    # fig.savefig('Images/Skeleton_CWB_Basic.png', dpi=400, bbox_inches='tight')
+    # fig.savefig('Images/Skeleton_CWB_Basic.pdf', dpi=400, bbox_inches='tight')
 
     
 
@@ -1743,8 +1841,9 @@ def main():
     # WR48a_gif()
     
     # book_chapter_plot()
+    poster_plot()
     
-    WR104_proposal_plot()
+    # WR104_proposal_plot()
     
 
 
