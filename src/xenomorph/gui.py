@@ -440,9 +440,9 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
 
     root.mainloop()
 
-# def main():
-#     create_GUI()
+def main():
+    create_GUI()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
     
