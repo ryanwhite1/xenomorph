@@ -190,7 +190,7 @@ WR48a2 = {"m1":15.,                  # solar masses
         "gradual_turn":23.8,
         "oblate":0.,
         "nuc_dist":0.1, "opt_thin_dist":0.2,           # nucleation and optically thin distance (AU)
-        'term_windspeed':2100., 'accel_rate':-5.,
+        'term_windspeed':1700., 'accel_rate':-5.,
         "orb_sd":40., "orb_amp":0., "orb_min":180, "az_sd":45., "az_amp":0.3, "az_min":90,
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,
@@ -218,7 +218,7 @@ WR104 = {"m1":10.,                # solar masses
         "gradual_turn":5.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
         "nuc_dist":0.1, "opt_thin_dist":0.2,           # nucleation and optically thin distance (AU)
-        'term_windspeed':880., 'accel_rate':-2.02,
+        'term_windspeed':1200., 'accel_rate':-5,
         "orb_sd":0., "orb_amp":0., "orb_min":180, "az_sd":0., "az_amp":0., "az_min":90, 
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,
@@ -246,7 +246,7 @@ WR112 = {"m1":15.,                # solar masses
         "gradual_turn":5.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
         "nuc_dist":0.1, "opt_thin_dist":0.2,           # nucleation and optically thin distance (AU)
-        'term_windspeed':880, 'accel_rate':-2.02,
+        'term_windspeed':700, 'accel_rate':-5,
         "orb_sd":0., "orb_amp":0., "orb_min":180, "az_sd":0., "az_amp":0., "az_min":90, 
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,
@@ -274,7 +274,7 @@ WR125 = {"m1":15.,                # solar masses
         "gradual_turn":1.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
         "nuc_dist":0.1, "opt_thin_dist":0.2,           # nucleation and optically thin distance (AU)
-        'term_windspeed':880, 'accel_rate':-2.02,
+        'term_windspeed':2700, 'accel_rate':-5,
         "orb_sd":0., "orb_amp":0., "orb_min":180, "az_sd":0., "az_amp":0., "az_min":90, 
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,
@@ -302,7 +302,7 @@ WR137 = {"m1":10,                # solar masses
         "gradual_turn":5.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
         "nuc_dist":0.1, "opt_thin_dist":0.2,           # nucleation and optically thin distance (AU)
-        'term_windspeed':880, 'accel_rate':-2.02,
+        'term_windspeed':1700, 'accel_rate':-5,
         "orb_sd":0., "orb_amp":0., "orb_min":180, "az_sd":0., "az_amp":0., "az_min":90, 
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,
@@ -331,8 +331,7 @@ WR140 = {"m1":8.4,                # solar masses
         "gradual_turn":0.5,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
         "nuc_dist":50., "opt_thin_dist":220.,           # nucleation and optically thin distance (AU)
-        "acc_max":900,                               # maximum acceleration (km/s/yr)
-        'term_windspeed':880, 'accel_rate':-2.02,
+        'term_windspeed':2600, 'accel_rate':-5,
         "orb_sd":80., "orb_amp":0., "orb_min":180, "az_sd":60., "az_amp":0., "az_min":90,
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,
@@ -360,7 +359,7 @@ test_system = {"m1":22.,                # solar masses
         "gradual_turn":5.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
         "nuc_dist":0.0001, "opt_thin_dist":2.,           # nucleation and optically thin distance (AU)
-        'term_windspeed':880, 'accel_rate':-2.02,
+        'term_windspeed':0.1, 'accel_rate':-5,
         "orb_sd":0., "orb_amp":0., "orb_min":180., "az_sd":30., "az_amp":0., "az_min":270.,
         "comp_incl":127.1, "comp_az":116.5, "comp_open":0., "comp_reduction":0., "comp_plume":1.,
         "comp_plume_sd":0., "comp_plume_max":0.,

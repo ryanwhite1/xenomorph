@@ -39,6 +39,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def Apep_VISIR_reference():
+    ''' Imports and slightly processes the raw fits data of Apep taken with VLT-VISIR (8.2 micron filter ?). 
+    '''
     pscale = 1000 * 23/512 # mas/pixel, (Yinuo's email said 45mas/px, but I think the FOV is 23x23 arcsec for a 512x512 image?)
     
     directory = "Data\\VLT"
@@ -65,6 +67,8 @@ def Apep_VISIR_reference():
     return xs, ys, data
 
 def Apep_JWST_reference():
+    ''' Imports and slightly processes the raw fits data of Apep taken with JWST (25.5 micron MIRI filter). 
+    '''
     
     directory = "Data\\JWST\\MAST_2024-07-29T2157\\JWST"
     fname = glob(directory+"\\jw05842-o001_t001_miri_f2550w\\*_i2d.fits")[0]
@@ -94,31 +98,59 @@ def Apep_JWST_reference():
     
     return xs, ys, data
 
-def create_GUI(system='apep', shells=1, resolution=256, reference='standard', reference_path=''):
-    '''
+def create_GUI(system='', shells=1, resolution=256, reference='standard'):
+    ''' Launches a tkinter graphical user interface with three visual panels and various sliders to change the system parameters in real time. 
+    The left panel is the colliding wind nebula with the current parameters given by the sliders. The centre panel is a reference image. The 
+    right panel is the difference of the reference image and model image: model - reference.
+    
     Parameters
     ----------
-    system : str
-        One of the pre-defined systems in the `systems.py` file (which are dictionaries that contain system parameters).
+    system : str or dict
+        If str: one of the pre-defined systems in the `systems.py` file (which are dictionaries that contain system parameters). 
+        If dict: a user-defined system dictionary. Take care to make sure all of the necessary keywords are defined. 
+    shells : int
+        The number of dust shells (orbits) to begin the GUI model with.
+    resolution : int
+        The number of pixels along one axis of the (square) model/reference image. If a named reference string is supplied, or a list of arrays is supplied, this 
+        input will be overwritten.
+    reference : str or list of j/np.arrays
+        The reference image for the middle panel in the GUI. 
+        If a string, should be one of {'standard', 'VISIR', 'JWST'}. 
+            - 'standard' will just generate a model nebula with the given system+shells parameters at the specified resolution. 
+            - 'VISIR' and 'JWST' will use the Apep data of choice, provided that data is in the correct location on the user's file system. 
+        If a list of arrays, it should be arranged as `[X_ref, Y_ref, H_ref]` where `X_ref` is a meshgrid of x angular coordinates (analogously for Y_ref),
+        and `H_ref` is a resolution x resolution array of pixel values. 
     '''
-    if system != '':
-        starcopy = eval(f'wrb.{system}.copy()')
-    else:
-        starcopy = wrb.WR104.copy()
+    # set the system parameters to a predefined system or use the user-defined params
+    if type(system) == dict:
+        starcopy = system
+    elif type(system) == str:
+        if system != '':
+            starcopy = eval(f'wrb.{system}.copy()')
+        else:
+            starcopy = wrb.WR104.copy()
 
+    # manually set the number of shells to generate the first model panel with
     starcopy['n_orbits'] = shells
 
-    if reference == 'standard':
-        # X_ref, Y_ref, H_ref = standard_sim_reference()
-        pass
-        # n = 256     # standard
-    elif reference == 'VISIR':
-        print('Manually setting resolution to 600 pixels.')
-        resolution = 600    # VISIR
-    elif reference == 'JWST':
-        print('Manually setting resolution to 898 pixels.')
-        resolution = 898    # JWST
+    # determine the necessary resolution for the gui image panels
+    if type(reference) == str:
+        ref_type = 'predefined'
+        if reference == 'standard':
+            pass    # we'll get these parameters later after doing the first model eval
+        elif reference == 'VISIR':
+            print('Manually setting resolution to 600 pixels.')
+            resolution = 600    # VISIR
+        elif reference == 'JWST':
+            print('Manually setting resolution to 898 pixels.')
+            resolution = 898    # JWST
+    elif jnp.size(reference[2]) > 1:
+        ref_type = 'user-defined'
+        resolution = len(reference[2])
+        if jnp.size(reference[2]) != resolution**2:
+            raise(ValueError, 'The input reference image is not a square array, but must be. Please try again with a square reference image.')
 
+    # we need to redefine the smooth histogram functions to have the necessary resolution
     @jit
     def smooth_histogram2d(particles, weights, stardata):
         im_size = resolution
@@ -136,38 +168,28 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
         im_size = resolution
         return gm.smooth_histogram2d_base(particles, weights, stardata, xbins, ybins, im_size)
     
+    # generate the first model evaluation
     particles, weights = gm.gui_funcs[int(starcopy['n_orbits']) - 1](starcopy)
     X, Y, H_original = smooth_histogram2d(particles, weights, starcopy)
     H_original = gm.add_stars(X[0, :], Y[:, 0], H_original, starcopy)
 
-    if reference == 'standard':
-        particles, weights = gm.dust_plume(starcopy)
-        X_ref, Y_ref, H_ref = X.copy(), Y.copy(), H_original.copy()
-    elif reference == 'VISIR':
-        X_ref, Y_ref, H_ref = Apep_VISIR_reference()
-    elif reference == 'JWST':
-        X_ref, Y_ref, H_ref = Apep_JWST_reference()
+    # now obtain the reference image data
+    if ref_type == 'predefined':
+        if reference == 'standard':
+            particles, weights = gm.dust_plume(starcopy)
+            X_ref, Y_ref, H_ref = X.copy(), Y.copy(), H_original.copy()
+        elif reference == 'VISIR':
+            X_ref, Y_ref, H_ref = Apep_VISIR_reference()
+        elif reference == 'JWST':
+            X_ref, Y_ref, H_ref = Apep_JWST_reference()
+    elif ref_type == 'user-defined':
+        X_ref, Y_ref, H_ref = reference
 
 
-    # fig, ax = plt.subplots()
-    # ax.plot(np.arange(H_ref.shape[0]), H_ref[:, 300])
-
-    # fig, ax = plt.subplots()
-    # ax.imshow(H_ref)
-    # ax.invert_yaxis()
-
-    # 
-    # fig, ax = plt.subplots()
-    # ax.plot(np.arange(H_ref.shape[0]), H_ref[:, 300])
-
-    # fig, ax = plt.subplots()
-    # ax.imshow(H_ref)
-    # ax.invert_yaxis()
-
-    # starcopy['phase'] -= (2024 - 2016) / starcopy['period']
-
+    # ---------- now set up the tkinter window ------------ #
     root = tkinter.Tk()
-    root.wm_title("Embedding in Tk")
+    root.protocol("WM_DELETE_WINDOW", root.destroy())
+    root.wm_title("xenomorph -- Graphical User Interface")
 
     titles = ['Model', 'Reference', 'Difference']
     w = 1/3.08
@@ -211,7 +233,18 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
     button_quit = tkinter.Button(master=root, text="Quit", command=root.destroy)
 
 
-    def update_frequency(param, new_val, X=X, Y=Y):
+    # ---------- tkinter admin practically done. now define sliders and update routine ------------ #
+    
+    def update_frequency(param, new_val):
+        ''' This function updates the panels of the GUI every time a slider is moved.
+        
+        Parameters
+        ----------
+        param : str
+            The system dictionary keyword that is being changed. 
+        new_val : float/int
+            The new value to set the param argument to.
+        '''
         starcopy[param] = float(new_val)
         
         particles, weights = gm.gui_funcs[int(starcopy['n_orbits']) - 1](starcopy)
@@ -242,6 +275,7 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
         canvas.draw()
 
 
+    # define sliders below:
     ecc = tkinter.Scale(root, from_=0, to=0.99, orient=tkinter.HORIZONTAL, 
                         command=lambda v: update_frequency('eccentricity', v), label="Eccentricity", resolution=0.01)
     ecc.set(starcopy['eccentricity'])
@@ -338,9 +372,6 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
     lum_power = tkinter.Scale(root, from_=0.001, to=2., orient=tkinter.HORIZONTAL,
                         command=lambda v: update_frequency('lum_power', v), label="Lum. Power", resolution=0.01)
     lum_power.set(starcopy['lum_power'])
-    # lat_v_var = tkinter.Scale(root, from_=-1., to=10., orient=tkinter.HORIZONTAL,
-    #                       command=lambda v: update_frequency('lat_v_var', v), label="Latitude V Var", resolution=0.01)
-    # lat_v_var.set(starcopy['lat_v_var'])
 
 
     spin_inc = tkinter.Scale(root, from_=0.001, to=90., orient=tkinter.HORIZONTAL,
@@ -415,9 +446,7 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
                         command=lambda v: update_frequency('aniso_OA_power', v), label="Aniso. OA Pow.", resolution=0.01)
     aniso_OA_power.set(starcopy['aniso_OA_power'])
 
-
-
-
+    # arrange sliders in this order:
     sliders = [ecc, inc, asc_node, arg_peri, phase, period, m1, m2,  
                 distance, ws1, turnon, turnoff, gradual_turn, opang, nuc_dist, n_orb,
                 osd, orbmin, oamp, azsd, azmin, azamp, accel_rate, term_windspeed,
@@ -426,6 +455,7 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
                 aniso_OA_power, star1amp, star1sd, star2amp, star2sd, star3amp, star3sd, star3dist
                 ]
 
+    # and finally place all buttons and sliders in correct position
     num_in_row = 8
     toolbar.grid(row=0, columnspan=num_in_row)
     canvas.get_tk_widget().grid(row=1, column=0, columnspan=num_in_row)
@@ -436,9 +466,7 @@ def create_GUI(system='apep', shells=1, resolution=256, reference='standard', re
 
     button_quit.grid(row=row+1, column=num_in_row//2)
 
-
-
-    root.mainloop()
+    root.mainloop()     # runs the tkinter instance
 
 def main():
     create_GUI()

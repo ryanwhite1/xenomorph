@@ -717,4 +717,9 @@ This code uses Jax to speed up code runtime (through just-in-time compilation) a
 I am still in the process of documenting the code itself, and also a readthedocs-like site. Check back here regularly to see what's going on. 
 
 ## Collaboration
-If you run into any issues while using the code, please feel free to open an Issue or a Pull request. The code is, at present, more or less feature complete but there will be bugs hiding amongst the diamond I'm sure.
+If you run into any issues while using the code, please feel free to open an Issue or a Pull request. The code is, at present, more or less feature complete but there will be bugs hiding within I'm sure.
+
+## To-do
+ - [ ] Test the effect of shock skewing a la [Parkin and Pittard (2008)](https://ui.adsabs.harvard.edu/abs/2008MNRAS.388.1047P/abstract)
+ - [ ] See if there's any effect by giving the ring of particles some extension along the radial axis (depth of dust formation)
+ - [ ] A new GUI slider to alter the contrast of the difference colourmap.
