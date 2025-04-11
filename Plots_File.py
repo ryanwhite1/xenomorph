@@ -386,6 +386,7 @@ def Apep_image_fit():
     starcopy['histmax'] = 0.5
     particles, weights = gm.dust_plume(starcopy)
     X, Y, H_original = smooth_histogram2d(particles, weights, starcopy)
+    H_original = gm.add_stars(X[0, :], Y[:, 0], H_original, starcopy)
     axes[0, 0].pcolormesh(X, Y, H_original, cmap='hot', rasterized=True)
     axes[0, 0].set(aspect='equal', ylabel='Relative Dec (")', xlim=(-8, 8), ylim=(-8, 8))
     axes[0, 0].set_facecolor('k')
@@ -427,7 +428,7 @@ def Apep_image_fit():
         year_starcopy['phase'] += (year - 2024) / year_starcopy['period']
         particles, weights = gm.dust_plume(year_starcopy)
         X_year, Y_year, H_year = smooth_histogram2d_w_bins(particles, weights, year_starcopy, X_ref[0, :], Y_ref[:, 0])
-        # H_year = gm.add_stars(X_ref[0, :], Y_ref[:, 0], H_year, starcopy)
+        H_year = gm.add_stars(X_ref[0, :], Y_ref[:, 0], H_year, starcopy)
         
         axes[a, b].pcolormesh(X_ref, Y_ref, H_year - H_ref, cmap='seismic', norm=norm, rasterized=True)
         axes[a, b].set(xlim=(-8, 8), ylim=(-8, 8))
@@ -1821,7 +1822,7 @@ def main():
     # Apep_Velocity_Map(velocity='POS')
     
     # Apep_JWST_mosaic()
-    # Apep_image_fit()
+    Apep_image_fit()
     # apep_tertiary_movement()
     
     # Apep_flipbook(pages=98)
@@ -1841,7 +1842,7 @@ def main():
     # WR48a_gif()
     
     # book_chapter_plot()
-    poster_plot()
+    # poster_plot()
     
     # WR104_proposal_plot()
     
