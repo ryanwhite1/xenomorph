@@ -37,7 +37,7 @@ planck = lambda x: (c1 / x**5) * (1 / (np.exp(c2 / x) - 1))
 
 
 # model_spectrum = np.loadtxt("ob-i_29-30_sed.txt")
-model_spectrum = np.loadtxt("ob-i_28-30_sed.txt")
+model_spectrum = np.loadtxt("Data/O-star-spectra/ob-i_28-30_sed.txt")
 
 wavelengths = 10**model_spectrum[:, 0]
 
@@ -53,16 +53,23 @@ fluxes = fluxes / 1e7 * 1e4 # calibrate to W/m^2/A from erg/cm^2/s/A
 
 # now manually calibrate the brightness down a bit to compensate for the model star being significantly brighter
 
-# fluxes *= 10**(5.9 - 6.07)
+fluxes *= 10**(5.9 - 6.07)
 
 def trap(x1, x2, y1, y2):
     wid = x2 - x1
     return 0.5 * wid * (y1 + y2)
 
 UVFlux = 0
+G0 = 0
+
 
 for i in range(len(fluxes) - 1):
     UVFlux += trap(wavelengths[i], wavelengths[i + 1], fluxes[i], fluxes[i+1])
+    if wavelengths[i] >= 912 and wavelengths[i+1] <= 2400:
+        G0 += trap(wavelengths[i], wavelengths[i + 1], fluxes[i], fluxes[i+1]) * 1e7 / 1e4
+
+print(G0)
+
     
 fig, ax = plt.subplots()
 
