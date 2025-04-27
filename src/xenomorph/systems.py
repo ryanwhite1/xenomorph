@@ -215,10 +215,10 @@ WR104 = {"m1":10.,                # solar masses
         "windspeed2":2000.,      # km/s
         "turn_on":-180.,         # true anomaly (degrees)
         "turn_off":180.,         # true anomaly (degrees)
-        "gradual_turn":5.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
+        "gradual_turn":0.1,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
-        "nuc_dist":0.1, "opt_thin_dist":0.2,           # nucleation and optically thin distance (AU)
-        'term_windspeed':1200., 'accel_rate':-5,
+        "nuc_dist":1., "opt_thin_dist":2.,           # nucleation and optically thin distance (AU)
+        'term_windspeed':1200., 'accel_rate':-5.,
         "orb_sd":0., "orb_amp":0., "orb_min":180, "az_sd":0., "az_amp":0., "az_min":90, 
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,
@@ -286,23 +286,23 @@ WR125 = {"m1":15.,                # solar masses
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
 
 # below are rough params for WR 137
-WR137 = {"m1":10,                # solar masses
-        "m2":20,                # solar masses
+WR137 = {"m1":10.,                # solar masses
+        "m2":20.,                # solar masses
         "eccentricity":0.315, 
         "inclination":97.2,       # degrees
         "asc_node":117.91,         # degrees
         "arg_peri":0.6,           # degrees
-        "open_angle":18.6,       # degrees (full opening angle)
+        "open_angle":37.2,       # degrees (full opening angle)
         "period":13.1,           # years
-        "distance":1941,        # pc
-        "windspeed1":1700,       # km/s
-        "windspeed2":2000,      # km/s
-        "turn_on":-180,         # true anomaly (degrees)
-        "turn_off":180,         # true anomaly (degrees)
-        "gradual_turn":5.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
+        "distance":1941.,        # pc
+        "windspeed1":1700.,       # km/s
+        "windspeed2":2000.,      # km/s
+        "turn_on":-180.,         # true anomaly (degrees)
+        "turn_off":180.,         # true anomaly (degrees)
+        "gradual_turn":0.,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
-        "nuc_dist":0.1, "opt_thin_dist":0.2,           # nucleation and optically thin distance (AU)
-        'term_windspeed':1700, 'accel_rate':-5,
+        "nuc_dist":1., "opt_thin_dist":2.,           # nucleation and optically thin distance (AU)
+        'term_windspeed':1700., 'accel_rate':-5.,
         "orb_sd":0., "orb_amp":0., "orb_min":180, "az_sd":0., "az_amp":0., "az_min":90, 
         "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
         "comp_plume_sd":0., "comp_plume_max":0.,

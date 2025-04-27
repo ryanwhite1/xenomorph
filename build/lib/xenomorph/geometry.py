@@ -890,7 +890,7 @@ def smooth_histogram2d(particles, weights, stardata):
     return smooth_histogram2d_base(particles, weights, stardata, xedges, yedges, im_size)
 @jit
 def smooth_histogram2d_w_bins(particles, weights, stardata, xbins, ybins):
-    im_size = n
+    im_size = len(xbins)
     return smooth_histogram2d_base(particles, weights, stardata, xbins, ybins, im_size)
 
 
