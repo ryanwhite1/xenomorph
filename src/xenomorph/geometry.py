@@ -1495,8 +1495,22 @@ def plume_velocity_map(particles, weights, stardata, velocity='LOS'):
 
 
 
+def mcfost_points(system, shells, shell_mass, filename):
+    '''
+    '''
+    particles, weights = gui_funcs[shells - 1](system)
 
+    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (system['distance'] * 3.086e13) # convert from angular coords back to physical coords
+    particles /= AU2km  # MCFOST needs distances in au
 
+    masses = shell_mass * shells * weights / len(weights)
+
+    from astropy.io import fits
+
+    fits_masses = fits.PrimaryHDU(data=masses)
+    fits_positions = fits.ImageHDU(data=particles)
+    hdul = fits.HDUList([fits_masses, fits_positions])
+    hdul.writeto(filename)
 
 
 

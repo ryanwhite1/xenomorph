@@ -292,7 +292,7 @@ WR137 = {"m1":10.,                # solar masses
         "inclination":97.2,       # degrees
         "asc_node":117.91,         # degrees
         "arg_peri":0.6,           # degrees
-        "open_angle":18.6,       # degrees (full opening angle)
+        "open_angle":37.2,       # degrees (full opening angle)
         "period":13.1,           # years
         "distance":1941.,        # pc
         "windspeed1":1700.,       # km/s
