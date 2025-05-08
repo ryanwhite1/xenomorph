@@ -16,6 +16,7 @@ from scipy.ndimage import gaussian_filter
 import jax.scipy.signal as signal
 from matplotlib import animation
 import time
+from tqdm import tqdm
 
 import xenomorph.systems as wrb
 import xenomorph.geometry as gm
@@ -60,6 +61,60 @@ def apep_plot(filename, custom_params={}):
     
     fig.savefig(f'Images/{filename}.png', dpi=400, bbox_inches='tight')
     fig.savefig(f'Images/{filename}.pdf', dpi=400, bbox_inches='tight')
+
+def apep_rotate_gif():
+    star = wrb.apep.copy()
+
+    particles, weights = gm.dust_plume(star)
+    X, Y, H = smooth_histogram2d(particles, weights, star)
+
+    n = 100
+
+    inclinations = jnp.linspace(0, 360, n)
+
+    particles_list = []
+
+    for inc in tqdm(inclinations):
+        star['inclination'] = inc
+        particles, weights = gm.dust_plume(star)
+        _, _, H = smooth_histogram2d(particles, weights, star)
+        H = gm.add_stars(X[0, :], Y[:, 0], H, star)
+
+        particles_list.append(H)
+
+    every = 1
+    length = 8
+    # now calculate some parameters for the animation frames and timing
+    frames = jnp.arange(0, n, every)    # iterable for the animation function. Chooses which frames (indices) to animate.
+    fps = len(frames) // length  # fps for the final animation
+    
+    fig, ax = plt.subplots(figsize=(6, 6))
+    # ax.set_facecolor('k')
+    ax.set_axis_off()
+    
+    fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+
+    import matplotlib
+
+    cmap = matplotlib.cm.get_cmap('hot')
+    
+    rgba = cmap(0.)
+
+    def animate(i):
+        if (i/n)*10%1 == 0:
+            print(i)
+        ax.cla()
+        ax.pcolormesh(X, Y, particles_list[i], cmap='hot')
+        ax.set(aspect='equal', xlim=(-8, 8), ylim=(-8, 8))
+        ax.set_facecolor(rgba)
+        # ax.text(5, 6.5, f"{years_list[i]}", c='w', fontsize=20)
+        return fig, 
+    
+    ani = animation.FuncAnimation(fig, animate, frames=frames, blit=True, repeat=False)
+    # writer = animation.FFMpegWriter(fps=fps)
+    ani.save("Images/Apep_Rotate_Gif.gif", writer='ffmpeg', fps=fps)
+
+
 
 def apep_cone_plot():
     def turning_point(data):
@@ -130,14 +185,17 @@ def apep_cone_plot():
     
     fig, axes = plt.subplots(figsize=(9, 3), ncols=3, sharey=True, gridspec_kw={'wspace':0})
     
+    sfig, saxes = plt.subplots(figsize=(7, 7), nrows=2, ncols=2, sharey=True, sharex=True, gridspec_kw={'wspace':0, 'hspace':0})
         
-    axes[1].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
-    axes[1].plot(cone_circ[0, :], cone_circ[1, :], c='w', rasterized=True)
-    axes[1].plot([0, np.mean(cone_circ[0, :])], [0, np.mean(cone_circ[1, :])], ls='--', c='w', rasterized=True)
-    axes[1].plot([0, point_1[0]], [0, point_1[1]], c='w', rasterized=True)
-    axes[1].plot([0, point_2[0]], [0, point_2[1]], c='w', rasterized=True)
+    for ax in [axes[1], saxes[0][1]]:
+        ax.pcolormesh(X, Y, H, cmap='hot', rasterized=True)
+        ax.plot(cone_circ[0, :], cone_circ[1, :], c='w', rasterized=True)
+        ax.plot([0, np.mean(cone_circ[0, :])], [0, np.mean(cone_circ[1, :])], ls='--', c='w', rasterized=True)
+        ax.plot([0, point_1[0]], [0, point_1[1]], c='w', rasterized=True)
+        ax.plot([0, point_2[0]], [0, point_2[1]], c='w', rasterized=True)
     
     axes[2].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
+    saxes[1][1].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
     
     star['comp_reduction'] = 0
     
@@ -146,31 +204,48 @@ def apep_cone_plot():
     H = gm.add_stars(X[0, :], Y[:, 0], H, star)
     
     axes[0].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
+    saxes[0][0].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
     
     import matplotlib
 
-    cmap = matplotlib.cm.get_cmap('hot')
+    cmap = matplotlib.colormaps.get_cmap('hot')
+    
+    edge = np.max(X)
     
     rgba = cmap(0.)
-    for ax in axes:
-        ax.get_xaxis().set_visible(False)
-        ax.get_yaxis().set_visible(False)
-        ax.set_facecolor(rgba)
-        for direction in ['top', 'right', 'bottom', 'left']:
-            ax.spines[direction].set_visible(False)
-        xlim = np.array(ax.get_xlim())
-        ylim = np.array(ax.get_ylim())
-        # ax.set(xlim=1.1*xlim, ylim=1.1*ylim)
-        for x in xlim:
-            ax.axvline(x, c='w')
-        for y in ylim:
-            ax.axhline(y, c='w')
-        
-        # yval = 0.8 * ylim[1] #if i < 2 else 0.8 * ylim[0]
-        # AX.text(0.9 * xlim[0], yval, order[i], c='w', fontsize='14')
+
+    xs, ys, data = Apep_VISIR_reference(2018)
+    saxes[1][0].pcolormesh(xs, ys, data, cmap='hot', rasterized=True)
+    saxes[1][0].set(xlim=(-edge, edge), ylim=(-edge, edge))
+
+    for AXES in [axes, [saxes[0][0], saxes[0][1], saxes[1][0], saxes[1][1]]]:
+        for ax in AXES:
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            ax.set_facecolor(rgba)
+            for direction in ['top', 'right', 'bottom', 'left']:
+                ax.spines[direction].set_visible(False)
+
+            for val in [-edge, edge]:
+                ax.axvline(val, c='w')
+                ax.axhline(val, c='w')
+                
+            
+            # yval = 0.8 * ylim[1] #if i < 2 else 0.8 * ylim[0]
+            # AX.text(0.9 * xlim[0], yval, order[i], c='w', fontsize='14')
     
     fig.savefig('Images/Apep_Cone_horiz.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/Apep_Cone_horiz.pdf', dpi=400, bbox_inches='tight')
+
+    
+    # num = 
+    
+    # for val in [-num, num]:
+    #     saxes[1][0].axvline(val, c='w')
+    #     saxes[1][0].axhline(val, c='w')
+    sfig.savefig('Images/Apep_Cone_square.png', dpi=400, bbox_inches='tight')
+    sfig.savefig('Images/Apep_Cone_square.pdf', dpi=400, bbox_inches='tight')
+
 
 def Apep_VISIR_reference(year):
     from glob import glob
@@ -1075,7 +1150,7 @@ def variation_gaussian():
     for i in range(len(As)):
         values = gaussian(As[i], thetas, minimum_az, sigmas[i])
         
-        ax.plot(thetas, values, label=f'$A={As[i]}$, $\sigma={sigmas[i]}^\circ$')
+        ax.plot(thetas, values, label=fr'$A={As[i]}$, $\sigma={sigmas[i]}^\circ$')
         ax2.plot(thetas, values)
     
     ax.legend(frameon=False)
@@ -1811,6 +1886,7 @@ def main():
     # apep_plot('Apep_Plot')
     # apep_plot('Apep_Plot_No_Photodiss', custom_params={'comp_reduction':0})
     # apep_cone_plot()
+    apep_rotate_gif()
     
     # Apep_VISIR_mosaic()
     # Apep_VISIR_expansion()
@@ -1822,7 +1898,7 @@ def main():
     # Apep_Velocity_Map(velocity='POS')
     
     # Apep_JWST_mosaic()
-    Apep_image_fit()
+    # Apep_image_fit()
     # apep_tertiary_movement()
     
     # Apep_flipbook(pages=98)

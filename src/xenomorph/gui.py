@@ -188,7 +188,7 @@ def create_GUI(system='', shells=1, resolution=256, reference='standard'):
 
     # ---------- now set up the tkinter window ------------ #
     root = tkinter.Tk()
-    root.protocol("WM_DELETE_WINDOW", root.destroy())
+    # root.protocol("WM_DELETE_WINDOW", root.destroy())
     root.wm_title("xenomorph -- Graphical User Interface")
 
     titles = ['Model', 'Reference', 'Difference']
