@@ -16,6 +16,7 @@ from scipy.ndimage import gaussian_filter
 import jax.scipy.signal as signal
 from matplotlib import animation
 import time
+from tqdm import tqdm
 
 import xenomorph.systems as wrb
 import xenomorph.geometry as gm
@@ -60,6 +61,60 @@ def apep_plot(filename, custom_params={}):
     
     fig.savefig(f'Images/{filename}.png', dpi=400, bbox_inches='tight')
     fig.savefig(f'Images/{filename}.pdf', dpi=400, bbox_inches='tight')
+
+def apep_rotate_gif():
+    star = wrb.apep.copy()
+
+    particles, weights = gm.dust_plume(star)
+    X, Y, H = smooth_histogram2d(particles, weights, star)
+
+    n = 100
+
+    inclinations = jnp.linspace(0, 360, n)
+
+    particles_list = []
+
+    for inc in tqdm(inclinations):
+        star['inclination'] = inc
+        particles, weights = gm.dust_plume(star)
+        _, _, H = smooth_histogram2d(particles, weights, star)
+        H = gm.add_stars(X[0, :], Y[:, 0], H, star)
+
+        particles_list.append(H)
+
+    every = 1
+    length = 8
+    # now calculate some parameters for the animation frames and timing
+    frames = jnp.arange(0, n, every)    # iterable for the animation function. Chooses which frames (indices) to animate.
+    fps = len(frames) // length  # fps for the final animation
+    
+    fig, ax = plt.subplots(figsize=(6, 6))
+    # ax.set_facecolor('k')
+    ax.set_axis_off()
+    
+    fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+
+    import matplotlib
+
+    cmap = matplotlib.cm.get_cmap('hot')
+    
+    rgba = cmap(0.)
+
+    def animate(i):
+        if (i/n)*10%1 == 0:
+            print(i)
+        ax.cla()
+        ax.pcolormesh(X, Y, particles_list[i], cmap='hot')
+        ax.set(aspect='equal', xlim=(-8, 8), ylim=(-8, 8))
+        ax.set_facecolor(rgba)
+        # ax.text(5, 6.5, f"{years_list[i]}", c='w', fontsize=20)
+        return fig, 
+    
+    ani = animation.FuncAnimation(fig, animate, frames=frames, blit=True, repeat=False)
+    # writer = animation.FFMpegWriter(fps=fps)
+    ani.save("Images/Apep_Rotate_Gif.gif", writer='ffmpeg', fps=fps)
+
+
 
 def apep_cone_plot():
     def turning_point(data):
@@ -1830,7 +1885,8 @@ def poster_plot():
 def main():
     # apep_plot('Apep_Plot')
     # apep_plot('Apep_Plot_No_Photodiss', custom_params={'comp_reduction':0})
-    apep_cone_plot()
+    # apep_cone_plot()
+    apep_rotate_gif()
     
     # Apep_VISIR_mosaic()
     # Apep_VISIR_expansion()

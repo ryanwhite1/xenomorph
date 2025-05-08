@@ -1,4 +1,4 @@
-#!/home/ryanw/anaconda3/bin/python
+#!/bin/bash
 from pymcfost import run
 
-run('apep.para')
+run('debris.para')

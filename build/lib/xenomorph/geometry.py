@@ -1508,7 +1508,7 @@ def mcfost_points(system, shells, shell_mass, filename):
     from astropy.io import fits
 
     fits_masses = fits.PrimaryHDU(data=masses)
-    fits_positions = fits.ImageHDU(data=particles)
+    fits_positions = fits.ImageHDU(data=particles.T)
     hdul = fits.HDUList([fits_masses, fits_positions])
     hdul.writeto(filename)
 
