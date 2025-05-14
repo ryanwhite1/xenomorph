@@ -45,6 +45,22 @@ def smooth_histogram2d(particles, weights, stardata):
 def smooth_histogram2d_w_bins(particles, weights, stardata, xbins, ybins):
     im_size = n
     return gm.smooth_histogram2d_base(particles, weights, stardata, xbins, ybins, im_size)
+@jit
+def smooth_histogram2d_898(particles, weights, stardata):
+    im_size = 898
+    
+    x = particles[0, :]
+    y = particles[1, :]
+    
+    xbound, ybound = jnp.max(jnp.abs(x)), jnp.max(jnp.abs(y))
+    bound = jnp.max(jnp.array([xbound, ybound])) * (1. + 2. / im_size)
+    
+    xedges, yedges = jnp.linspace(-bound, bound, im_size+1), jnp.linspace(-bound, bound, im_size+1)
+    return gm.smooth_histogram2d_base(particles, weights, stardata, xedges, yedges, im_size)
+@jit
+def smooth_histogram2d_w_bins_898(particles, weights, stardata, xbins, ybins):
+    im_size = 898
+    return gm.smooth_histogram2d_base(particles, weights, stardata, xbins, ybins, im_size)
 
 def apep_plot(filename, custom_params={}):
     star = wrb.apep.copy()
@@ -58,6 +74,24 @@ def apep_plot(filename, custom_params={}):
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.pcolormesh(X, Y, H, cmap='hot', rasterized=True)
     ax.set(aspect='equal', xlabel='Relative RA (")', ylabel='Relative Dec (")')
+    
+    fig.savefig(f'Images/{filename}.png', dpi=400, bbox_inches='tight')
+    fig.savefig(f'Images/{filename}.pdf', dpi=400, bbox_inches='tight')
+
+def apep_plot_jwst(filename, custom_params={}):
+    star = wrb.apep.copy()
+    
+    for param in custom_params:
+        star[param] = custom_params[param]
+    
+    particles, weights = gm.gui_funcs[2](star)
+    X, Y, H = smooth_histogram2d_898(particles, weights, star)
+    H = gm.add_stars(X[0, :], Y[:, 0], H, star)
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.pcolormesh(X, Y, H, cmap='hot', vmin=0, vmax=0.7, rasterized=True)
+    ax.set(aspect='equal', xlabel='Relative RA (")', ylabel='Relative Dec (")')
+    ax.yaxis.set_label_position("right")
+    ax.yaxis.tick_right()
     
     fig.savefig(f'Images/{filename}.png', dpi=400, bbox_inches='tight')
     fig.savefig(f'Images/{filename}.pdf', dpi=400, bbox_inches='tight')
@@ -186,16 +220,22 @@ def apep_cone_plot():
     fig, axes = plt.subplots(figsize=(9, 3), ncols=3, sharey=True, gridspec_kw={'wspace':0})
     
     sfig, saxes = plt.subplots(figsize=(7, 7), nrows=2, ncols=2, sharey=True, sharex=True, gridspec_kw={'wspace':0, 'hspace':0})
+
+    vfig, vaxes = plt.subplot_mosaic([['left', 'upper right'],      # vertically aligned weird plot
+                                      ['left', 'right'],
+                                      ['left', 'lower right']],
+                                      figsize=(7, 7), layout='constrained', gridspec_kw={'wspace':0, 'hspace':0})
+    vaxes = [vaxes['left'], vaxes['upper right'], vaxes['right'], vaxes['lower right']] # turning that axes dict into a list makes things easier
         
-    for ax in [axes[1], saxes[0][1]]:
+    for ax in [axes[1], saxes[1][0], vaxes[2]]:
         ax.pcolormesh(X, Y, H, cmap='hot', rasterized=True)
         ax.plot(cone_circ[0, :], cone_circ[1, :], c='w', rasterized=True)
         ax.plot([0, np.mean(cone_circ[0, :])], [0, np.mean(cone_circ[1, :])], ls='--', c='w', rasterized=True)
         ax.plot([0, point_1[0]], [0, point_1[1]], c='w', rasterized=True)
         ax.plot([0, point_2[0]], [0, point_2[1]], c='w', rasterized=True)
     
-    axes[2].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
-    saxes[1][1].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
+    for ax in [axes[2], saxes[1][1], vaxes[3]]:
+        ax.pcolormesh(X, Y, H, cmap='hot', rasterized=True)
     
     star['comp_reduction'] = 0
     
@@ -203,8 +243,8 @@ def apep_cone_plot():
     X, Y, H = smooth_histogram2d(particles, weights, star)
     H = gm.add_stars(X[0, :], Y[:, 0], H, star)
     
-    axes[0].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
-    saxes[0][0].pcolormesh(X, Y, H, cmap='hot', rasterized=True)
+    for ax in [axes[0], saxes[0][1], vaxes[1]]:
+        ax.pcolormesh(X, Y, H, cmap='hot', rasterized=True)
     
     import matplotlib
 
@@ -215,10 +255,11 @@ def apep_cone_plot():
     rgba = cmap(0.)
 
     xs, ys, data = Apep_VISIR_reference(2018)
-    saxes[1][0].pcolormesh(xs, ys, data, cmap='hot', rasterized=True)
-    saxes[1][0].set(xlim=(-edge, edge), ylim=(-edge, edge))
+    for ax in [saxes[0][0], vaxes[0]]:
+        ax.pcolormesh(xs, ys, data, cmap='hot', rasterized=True)
+        ax.set(xlim=(-edge, edge), ylim=(-edge, edge))
 
-    for AXES in [axes, [saxes[0][0], saxes[0][1], saxes[1][0], saxes[1][1]]]:
+    for AXES in [axes, [saxes[0][0], saxes[0][1], saxes[1][0], saxes[1][1]], vaxes]:
         for ax in AXES:
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
@@ -233,6 +274,8 @@ def apep_cone_plot():
             
             # yval = 0.8 * ylim[1] #if i < 2 else 0.8 * ylim[0]
             # AX.text(0.9 * xlim[0], yval, order[i], c='w', fontsize='14')
+    for ax in vaxes:
+        ax.set_aspect('equal')
     
     fig.savefig('Images/Apep_Cone_horiz.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/Apep_Cone_horiz.pdf', dpi=400, bbox_inches='tight')
@@ -245,6 +288,9 @@ def apep_cone_plot():
     #     saxes[1][0].axhline(val, c='w')
     sfig.savefig('Images/Apep_Cone_square.png', dpi=400, bbox_inches='tight')
     sfig.savefig('Images/Apep_Cone_square.pdf', dpi=400, bbox_inches='tight')
+
+    vfig.savefig('Images/Apep_Cone_vertical.png', dpi=400, bbox_inches='tight')
+    vfig.savefig('Images/Apep_Cone_vertical.pdf', dpi=400, bbox_inches='tight')
 
 
 def Apep_VISIR_reference(year):
@@ -411,22 +457,7 @@ def Apep_image_fit():
     from matplotlib.figure import Figure
     import matplotlib.colors as colors
     from mpl_toolkits.axes_grid1 import make_axes_locatable
-    @jit
-    def smooth_histogram2d_898(particles, weights, stardata):
-        im_size = 898
-        
-        x = particles[0, :]
-        y = particles[1, :]
-        
-        xbound, ybound = jnp.max(jnp.abs(x)), jnp.max(jnp.abs(y))
-        bound = jnp.max(jnp.array([xbound, ybound])) * (1. + 2. / im_size)
-        
-        xedges, yedges = jnp.linspace(-bound, bound, im_size+1), jnp.linspace(-bound, bound, im_size+1)
-        return gm.smooth_histogram2d_base(particles, weights, stardata, xedges, yedges, im_size)
-    @jit
-    def smooth_histogram2d_w_bins_898(particles, weights, stardata, xbins, ybins):
-        im_size = 898
-        return gm.smooth_histogram2d_base(particles, weights, stardata, xbins, ybins, im_size)
+    
     
     from matplotlib import gridspec
     
@@ -462,10 +493,10 @@ def Apep_image_fit():
     particles, weights = gm.dust_plume(starcopy)
     X, Y, H_original = smooth_histogram2d(particles, weights, starcopy)
     H_original = gm.add_stars(X[0, :], Y[:, 0], H_original, starcopy)
-    axes[0, 0].pcolormesh(X, Y, H_original, cmap='hot', rasterized=True)
+    axes[0, 0].pcolormesh(X, Y, H_original, cmap='binary', rasterized=True)
     axes[0, 0].set(aspect='equal', ylabel='Relative Dec (")', xlim=(-8, 8), ylim=(-8, 8))
-    axes[0, 0].set_facecolor('k')
-    axes[0, 0].text(-7, 6, 'Model', c='w')
+    # axes[0, 0].set_facecolor('k')
+    axes[0, 0].text(-7, 6, 'Model', c='k')
     
     starcopy['histmax'] = 1.
 
@@ -1885,8 +1916,9 @@ def poster_plot():
 def main():
     # apep_plot('Apep_Plot')
     # apep_plot('Apep_Plot_No_Photodiss', custom_params={'comp_reduction':0})
+    apep_plot_jwst('Apep_Plot_JWST', custom_params={'histmax':0.5, 'lum_power':0.8})
     # apep_cone_plot()
-    apep_rotate_gif()
+    # apep_rotate_gif()
     
     # Apep_VISIR_mosaic()
     # Apep_VISIR_expansion()
