@@ -96,6 +96,18 @@ def apep_plot_jwst(filename, custom_params={}):
     fig.savefig(f'Images/{filename}.png', dpi=400, bbox_inches='tight')
     fig.savefig(f'Images/{filename}.pdf', dpi=400, bbox_inches='tight')
 
+    fig2, ax2 = plt.subplots(figsize=(6, 5))
+    ax2.pcolormesh(Y, X, np.fliplr(np.rot90(H, k=0)), cmap='hot', vmin=0, vmax=0.7, rasterized=True)
+    ax2.set(aspect='equal', ylabel='Relative RA (")', xlabel='Relative Dec (")', ylim=(-1.2*np.max(X), 1.2*np.max(X)))
+    import matplotlib
+    cmap = matplotlib.cm.get_cmap('hot')
+    rgba = cmap(0.)
+    ax2.set_facecolor(rgba)
+    # ax2.yaxis.set_label_position("right")
+    # ax2.yaxis.tick_right()
+    fig2.savefig(f'Images/{filename}-rotated.png', dpi=400, bbox_inches='tight')
+    fig2.savefig(f'Images/{filename}-rotated.pdf', dpi=400, bbox_inches='tight')
+
 def apep_rotate_gif():
     star = wrb.apep.copy()
 
