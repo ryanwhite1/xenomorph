@@ -44,7 +44,7 @@ edit_uri: ""
 strict: true # Prevent builds with warnings
 
 plugins:
-  - mkdocs-jupyter
+  - mkdocs-jupyter:
   - search
   - autorefs
   # - exclude:
@@ -70,24 +70,36 @@ plugins:
             members_order: source
 
 markdown_extensions:
+  # - mdx_math  #https://stackoverflow.com/questions/27882261/mkdocs-and-mathjax <- source!
   - admonition
+  - pymdownx.arithmatex:
+      generic: true
   - pymdownx.details
   - pymdownx.extra
+  - pymdownx.tasklist:
+        custom_checkbox: true
   - toc:
       toc_depth: 2
+  
+  
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 # ===== Navigation =====
 nav:
     - Home: index.md
 
     - Tutorials:
-        - Introductory:
-            - A Basic Overview:         tutorials/index.md
-            # - Detectors:
-            # - Building Telescope:
-            # - Building a coronagraph:
-            # - The Wavefront and PSF classes:
-            # - functional psf modelling with the Utils module:
+      - Plotting a Spiral:         tutorials/First_Spiral.ipynb
+      # - Detectors:
+      # - Building Telescope:
+      # - Building a coronagraph:
+      # - The Wavefront and PSF classes:
+      # - functional psf modelling with the Utils module:
             
 
     # - FAQ & Troubleshooting: faq.md

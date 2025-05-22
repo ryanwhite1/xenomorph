@@ -39,6 +39,9 @@ apep = {"m1":15.,                # solar masses
         "spin_inc":0., "spin_Omega":0.,
         "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180, "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0.7, 'star1sd':-0.7, 'star2amp':0.7, 'star2sd':-0.7, 'star3amp':0.7, 'star3sd':-1.12, 'star3dist':1700}
+def apep_refs():
+        for ref in ["White et al. 2025 - in prep.", "Han et al. 2020 - 2020MNRAS.498.5604H", "Callingham et al. 2020 - 2020MNRAS.495.3323C"]:
+                print(ref)
 # apep_aniso = {"m1":15.,                # solar masses
 #         "m2":10.,                # solar masses
 #         "eccentricity":0.83, 
@@ -256,6 +259,9 @@ WR112 = {"m1":15.,                # solar masses
         "spin_inc":0., "spin_Omega":0.,
         "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180, "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
+def WR112_refs():
+        for ref in ["Lau et al. 2020 - 2020ApJ...900..190L"]:
+                print(ref)
 
 # below are rough params for WR 112
 WR125 = {"m1":15.,                # solar masses
@@ -312,35 +318,40 @@ WR137 = {"m1":10.,                # solar masses
         "spin_inc":0., "spin_Omega":0., 
         "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180, "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
-
+def WR137_refs():
+        for ref in ["Richardson et al. 2024 - 2024ApJ...977...78R"]:
+                print(ref)
 
 # below are rough params for WR 140
 WR140 = {"m1":8.4,                # solar masses
-        "m2":20,                # solar masses
+        "m2":20.,                # solar masses
         "eccentricity":0.8964, 
         "inclination":119.6,       # degrees
         "asc_node":275.,         # degrees
-        "arg_peri":180-46.8,           # degrees
-        "open_angle":80,       # degrees (full opening angle)
+        "arg_peri":180.-46.8,           # degrees
+        "open_angle":80.,       # degrees (full opening angle)
         "period":2896.35/365.25,           # years
-        "distance":1670,        # pc
-        "windspeed1":2600,       # km/s
-        "windspeed2":2400,      # km/s
-        "turn_on":-135,         # true anomaly (degrees)
-        "turn_off":135,         # true anomaly (degrees)
+        "distance":1670.,        # pc
+        "windspeed1":2600.,       # km/s
+        "windspeed2":2400.,      # km/s
+        "turn_on":-135.,         # true anomaly (degrees)
+        "turn_off":135.,         # true anomaly (degrees)
         "gradual_turn":0.5,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
         "oblate":0.,
         "nuc_dist":50., "opt_thin_dist":220.,           # nucleation and optically thin distance (AU)
-        'term_windspeed':2600, 'accel_rate':-5,
-        "orb_sd":80., "orb_amp":0., "orb_min":180, "az_sd":60., "az_amp":0., "az_min":90,
-        "comp_incl":0, "comp_az":0, "comp_open":0, "comp_reduction":0., "comp_plume":0,
+        'term_windspeed':2600., 'accel_rate':-5.,
+        "orb_sd":80., "orb_amp":0., "orb_min":180, "az_sd":60., "az_amp":0., "az_min":90.,
+        "comp_incl":0., "comp_az":0, "comp_open":0., "comp_reduction":0., "comp_plume":0.,
         "comp_plume_sd":0., "comp_plume_max":0.,
         "phase":0.6, 
-        "sigma":2,              # sigma for gaussian blur
-        "histmax":1, "lum_power":1., 
+        "sigma":2.,              # sigma for gaussian blur
+        "histmax":1., "lum_power":1., 
         "spin_inc":0., "spin_Omega":0.,
-        "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180, "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
+        "windspeed_polar":240.0, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
+def WR140_refs():
+        for ref in ["Han et al. 2022 - 2022Natur.610..269H", "Lau et al. 2022 - 2022NatAs...6.1308L"]:
+                print(ref)
 
 
 test_system = {"m1":22.,                # solar masses
