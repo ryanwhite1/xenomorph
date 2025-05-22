@@ -1,0 +1,95 @@
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.path
+    - navigation.indexes 
+    - navigation.top
+    - content.code.copy
+
+  palette:
+    # Light mode / dark mode
+    # We deliberately don't automatically use `media` to check a user's preferences. We default to light mode as
+    # (a) it looks more professional, and (b) is more obvious about the fact that it offers a (dark mode) toggle.
+    - scheme: default
+      primary: white
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+  logo: assets/Poster_Plot_trans.png
+    
+  icon:
+    repo: fontawesome/brands/github  # GitHub logo in top right
+    # logo: Images/Poster_Plot.png #material/telescope
+    # favicon: "Images/Poster_Plot.png" #material/telescope
+
+site_name: xenomorph
+docs_dir: docs/
+site_description: Tutorials for xenomorph.
+site_author: Ryan white
+site_url: https://ryanwhite1.github.io/xenomorph/
+repo_url: https://github.com/ryanwhite1/xenomorph
+repo_name: ryanwhite1/xenomorph
+edit_uri: "" 
+
+strict: true # Prevent builds with warnings
+
+plugins:
+  - mkdocs-jupyter
+  - search
+  - autorefs
+  # - exclude:
+  #     glob:
+  #       - Images/*
+  # - simple:
+  #     ignore:
+  #       - tests
+  #       - src
+  #       - build
+  #       - Images
+  #       - deprecated
+  #       - HMC_Testing
+  
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: "numpy"
+          rendering:
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.extra
+  - toc:
+      toc_depth: 2
+
+# ===== Navigation =====
+nav:
+    - Home: index.md
+
+    - Tutorials:
+        - Introductory:
+            - A Basic Overview:         tutorials/index.md
+            # - Detectors:
+            # - Building Telescope:
+            # - Building a coronagraph:
+            # - The Wavefront and PSF classes:
+            # - functional psf modelling with the Utils module:
+            
+
+    # - FAQ & Troubleshooting: faq.md
+    # - Change Log: CHANGELOG.md
+    # - Contributing: CONTRIBUTING.md

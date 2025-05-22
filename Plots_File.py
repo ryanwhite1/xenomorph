@@ -1822,7 +1822,7 @@ def WR104_proposal_plot():
     fig.savefig('Images/WR104.pdf', dpi=400, bbox_inches='tight')
     
 
-def poster_plot():
+def poster_plot(transparent=False):
 
     starcopy = wrb.WR104.copy()
     
@@ -1848,9 +1848,20 @@ def poster_plot():
     
     fig, ax = plt.subplots(figsize=(6, 6))
     
+    cmap = plt.get_cmap('gist_heat_r').copy()
+    if transparent:
+        fig.patch.set_alpha(0)
+        ax.patch.set_alpha(0)
+        
+        cmap.set_under((0, 0, 0, 0))
+        cmap_args = dict(cmap=cmap, vmin=1e-2, vmax=1)
+    else:
+        cmap_args = dict(cmap=cmap, vmin=0, vmax=1)
+        
+    
     ax.set_axis_off()
     # ax.plot(pos1[0, :], pos1[1, :])
-    ax.pcolormesh(X, Y, H, cmap='gist_heat_r', rasterized=True)
+    ax.pcolormesh(X, Y, H, rasterized=True, **cmap_args)
     ax.set(aspect='equal')
     
     every = 50
@@ -1858,8 +1869,11 @@ def poster_plot():
     alphas = weights[start:end:every] * (1 - np.linspace(0, 1, len(weights[start:end:every]))**0.2)
     ax.scatter(particles[0, start:end:every], particles[1, start:end:every], alpha=alphas)
     
-    fig.savefig('Images/Poster_Plot.png', dpi=400, bbox_inches='tight')
-    # fig.savefig('Images/Poster_Plot.pdf', dpi=400, bbox_inches='tight')
+    if not transparent:
+        fig.savefig('Images/Poster_Plot.png', dpi=400, bbox_inches='tight')
+        fig.savefig('Images/Poster_Plot.pdf', dpi=400, bbox_inches='tight')
+    else:
+        fig.savefig('Images/Poster_Plot_trans.png', dpi=400, bbox_inches='tight', transparent=True)
     
     
     
@@ -1928,7 +1942,7 @@ def poster_plot():
 def main():
     # apep_plot('Apep_Plot')
     # apep_plot('Apep_Plot_No_Photodiss', custom_params={'comp_reduction':0})
-    apep_plot_jwst('Apep_Plot_JWST', custom_params={'histmax':0.5, 'lum_power':0.8})
+    # apep_plot_jwst('Apep_Plot_JWST', custom_params={'histmax':0.5, 'lum_power':0.8})
     # apep_cone_plot()
     # apep_rotate_gif()
     
@@ -1963,6 +1977,7 @@ def main():
     
     # book_chapter_plot()
     # poster_plot()
+    poster_plot(transparent=True)
     
     # WR104_proposal_plot()
     
