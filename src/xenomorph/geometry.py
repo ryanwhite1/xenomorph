@@ -267,12 +267,11 @@ def nonlinear_accel(t, stardata):
     
     Parameters
     ----------
-    'accel_rate' : float
-        A quantity logged in base 10 that represents the acceleration rate in the exponential
-    'term_windspeed' : float
-        The final windspeed of the plume at t->inf
     t : float
         The age of the current ring in seconds
+    stardata : dict
+        The system parameter dictionary. In particular, 'accel_rate' (float; a quantity logged in base 10 that represents the acceleration rate in the exponential)
+        and 'term_windspeed' (float; the final windspeed of the plume at t->inf) are used.
     
     Returns
     -------
@@ -336,7 +335,7 @@ def dust_circle(i_nu, stardata, theta, plume_direction, widths):
     
     Parameters
     ----------
-    i, nu : list of [int, float]
+    i_nu : list of [int, float]
         i is the current ring number in our plume (e.g. the 1st generated ring will be i=0, the 10th generated ring will be i=9, etc)
         nu is the true anomaly value in radians
     stardata : dict
@@ -906,7 +905,8 @@ def spiral_grid(particles, weights, stardata):
         Particle positions in cartesian coordinates
     weights : array (Nparticles)
         Weight of each particle in the histogram (for orbital/azimuthal variations)
-    sigma : 
+    stardata : dict
+        The system parameter dictionary.
     '''
     im_size = 256
     
@@ -943,7 +943,10 @@ def spiral_grid_w_bins(particles, weights, stardata, xbins, ybins):
         Particle positions in cartesian coordinates
     weights : array (Nparticles)
         Weight of each particle in the histogram (for orbital/azimuthal variations)
-    sigma : 
+    stardata : dict
+        The system parameter dictionary.
+    xbins, ybins : j/np.array
+        The pixel border coordinates.
     '''
     im_size = 256
     
