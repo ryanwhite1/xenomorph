@@ -1,17 +1,29 @@
-# Welcome to MkDocs
+# xenomorph
+Modelling the morphology of Wolf-Rayet Colliding Wind Binary dust nebulae with fast and differentiable geometry.
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+![Apep](assets/Apep_evolution_pretty.gif)
 
-## Commands
+## Installation
+Currently the only way is to build from source. To do this, clone this repository and run
+```
+pip install .
+```
+when in the main `xenomorph` directory. We then recommend you create a file and run 
+```python
+import xenomorph as xm
+```
+to test that it built correctly.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+This code uses Jax to speed up code runtime (through just-in-time compilation) and allows aspects of the code to be natively differentiable. This will be installed during the build process if not already in the environment.
 
-## Project layout
+## Documentation
+I am still in the process of documenting the code itself, and also a readthedocs-like site. Check back here regularly to see what's going on. 
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+## Collaboration
+If you run into any issues while using the code, please feel free to open an Issue or a Pull request. The code is, at present, more or less feature complete but there will be bugs hiding within I'm sure.
+
+## To-do
+ - [ ] Test the effect of shock skewing a la [Parkin and Pittard (2008)](https://ui.adsabs.harvard.edu/abs/2008MNRAS.388.1047P/abstract)
+ - [ ] See if there's any effect by giving the ring of particles some extension along the radial axis (depth of dust formation)
+ - [ ] A new GUI slider to alter the contrast of the difference colourmap.
+ - [ ] Make the number of particles and rings per shell be user customisable.
