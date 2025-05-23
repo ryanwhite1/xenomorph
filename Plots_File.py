@@ -1942,7 +1942,6 @@ def poster_plot(transparent=False):
 def main():
     # apep_plot('Apep_Plot')
     # apep_plot('Apep_Plot_No_Photodiss', custom_params={'comp_reduction':0})
-    # apep_plot_jwst('Apep_Plot_JWST', custom_params={'histmax':0.5, 'lum_power':0.8})
     apep_plot_jwst('Apep_Plot_JWST', custom_params={'histmax':0.5, 'lum_power':0.6})
     # apep_cone_plot()
     # apep_rotate_gif()
