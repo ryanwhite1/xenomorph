@@ -1501,18 +1501,29 @@ def plume_velocity_map(particles, weights, stardata, velocity='LOS'):
 def mcfost_points(system, shells, shell_mass, filename):
     '''
     `mcfost system.para -density_file filename -img <wavelength>`
+
+
+    mcfost wr.para -df wrcube.fits -force_Mgas -fix_star -star_bb
+    mcfost wr.para -df wrcube.fits -force_Mgas -fix_star -star_bb -img 1.6
     '''
     particles, weights = gui_funcs[shells - 1](system)
 
     particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (system['distance'] * 3.086e13) # convert from angular coords back to physical coords
     particles /= AU2km  # MCFOST needs distances in au
 
-    masses = shell_mass * shells * weights / len(weights[jnp.where(weights > 0)])
+    filter = np.where(weights > 0)[0]
+
+    particles = particles[:, filter]
+    weights = weights[filter]
+
+    masses = shell_mass * shells * weights / jnp.sum(weights)
+
+    particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug!)
 
     from astropy.io import fits
 
-    fits_masses = fits.PrimaryHDU(data=masses)
-    fits_positions = fits.ImageHDU(data=particles.T)
+    fits_masses = fits.PrimaryHDU(masses)
+    fits_positions = fits.ImageHDU(particles.T)
     hdul = fits.HDUList([fits_masses, fits_positions])
     hdul.writeto(filename, overwrite=True)
 
