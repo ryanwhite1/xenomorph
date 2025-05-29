@@ -1,0 +1,3 @@
+# Geometry API
+
+::: xenomorph.geometry

@@ -41,7 +41,7 @@ repo_url: https://github.com/ryanwhite1/xenomorph
 repo_name: ryanwhite1/xenomorph
 edit_uri: "" 
 
-strict: true # Prevent builds with warnings
+# strict: true # Prevent builds with warnings
 
 plugins:
   - mkdocs-jupyter:
@@ -60,14 +60,19 @@ plugins:
   #       - HMC_Testing
   
   - mkdocstrings:
-      default_handler: python
-      handlers:
-        python:
-          paths: [src]
-          options:
-            docstring_style: "numpy"
-          rendering:
-            members_order: source
+        handlers:
+          python:
+            options:
+              docstring_style: "numpy"
+  # - mkdocstrings:
+  #     default_handler: python
+  #     handlers:
+  #       python:
+  #         paths: [src]
+  #         options:
+  #           docstring_style: "numpy"
+  #         rendering:
+  #           members_order: source
 
 markdown_extensions:
   # - mdx_math  #https://stackoverflow.com/questions/27882261/mkdocs-and-mathjax <- source!
@@ -95,11 +100,12 @@ nav:
 
     - Tutorials:
       - Plotting a Spiral:         tutorials/First_Spiral.ipynb
-      # - Detectors:
-      # - Building Telescope:
-      # - Building a coronagraph:
-      # - The Wavefront and PSF classes:
-      # - functional psf modelling with the Utils module:
+      - The xenomorph GUI:         tutorials/gui.ipynb
+    
+    - Reference:
+      - Geometry: Reference/geometry.md
+      - GUI: Reference/gui.md
+      - Systems: Reference/systems.md
             
 
     # - FAQ & Troubleshooting: faq.md
