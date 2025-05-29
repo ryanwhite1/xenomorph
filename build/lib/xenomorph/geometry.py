@@ -684,7 +684,6 @@ def dust_plume_sub(theta, times, n_orbits, period_s, stardata):
     a1, a2 = calculate_semi_major(period_s, stardata['m1'], stardata['m2'])
     r1 = a1 * (1. - ecc * jnp.cos(E)) * 1e-3     # radius in km 
     r2 = a2 * (1. - ecc * jnp.cos(E)) * 1e-3
-    # ws_ratio = stardata['windspeed1'] / stardata['windspeed2']
     
     positions1 = jnp.array([jnp.cos(true_anomaly), 
                             jnp.sin(true_anomaly), 
@@ -694,20 +693,6 @@ def dust_plume_sub(theta, times, n_orbits, period_s, stardata):
     positions2 *= -r2     # position in the orbital frame
     
     # turn_on_mean_anom, turn_off_... are in range (-pi, pi]. Need to add pi to get in range (0, 2pi], then divide by 2pi to get in range (0, 1].
-    # non_dimensional_times = (jnp.linspace(turn_on_mean_anom, turn_off_mean_anom, len(times)) + jnp.pi) / (2 * jnp.pi)
-    
-    
-    # t0 = turn_on_mean_anom%(2.*jnp.pi)/(2.*jnp.pi) - stardata['phase']
-    # t1 = stardata['phase'] - turn_off_mean_anom / (2. * jnp.pi)
-    # t = jnp.linspace(t0, t1, len(times))
-    # # t = jnp.where(t < 0, t + 1, t)
-    # non_dimensional_times = jnp.where(t > 1, t - 1, t)
-    # non_dimensional_times = t
-    
-    # t0 = turn_on_mean_anom%(2. * jnp.pi) / (2. * jnp.pi) - stardata['phase']
-    # t1 = 1 - (stardata['phase'] - turn_off_mean_anom / (2. * jnp.pi))
-    # non_dimensional_times = jnp.linspace(t0, t1, len(times))
-    # print(t0, t1)
     
     shell_times = jnp.arange(n_orbits)
     shell_times = jnp.repeat(shell_times, n_t)
@@ -719,19 +704,9 @@ def dust_plume_sub(theta, times, n_orbits, period_s, stardata):
     
     non_dimensional_times = shell_times + non_dimensional_times
     
-    
-    
-    
-    
-    
-    
-
-    # widths = stardata['windspeed1'] * period_s * (n_orbits - non_dimensional_times)
-    
-    
     widths = nonlinear_accel(period_s * (n_orbits - non_dimensional_times), stardata)
     widths = widths * period_s * (n_orbits - non_dimensional_times)
-    # print(widths / 1e11)
+
     
     plume_direction = positions1 - positions2               # get the line of sight from first star to the second in the orbital frame
     
@@ -764,10 +739,20 @@ def dust_plume_sub(theta, times, n_orbits, period_s, stardata):
 
 @jit
 def dust_plume(stardata):
-    '''
+    ''' Generates a point cloud of discrete particles that can be used to approximate a CWB dust plume.
     Parameters
     ----------
     stardata : dict
+        The system parameter file.
+    
+    Returns
+    -------
+    particles : jnp.array
+        The (3xN) array of particle positions for the point cloud. These are rotated to be in the plane
+        of the sky, and are in units of arcseconds. 
+    weights : jnp.array
+        The (1xN) array of particle weights, all in the range 0 to 1. A weight of 0 will not contribute
+        to the imaging or any post-processing (e.g. ray tracing with MCFOST).
     '''
     phase = stardata['phase']%1
     
@@ -784,21 +769,39 @@ def dust_plume(stardata):
     return particles, weights
   
     
-gui_funcs = [lambda stardata, i=i: dust_plume_GUI_sub(stardata, i) for i in range(1, 20)]
+gui_funcs = [lambda stardata, i=i: dust_plume_custom(stardata, i) for i in range(1, 20)]
 gui_funcs = [jit(gui_funcs[i]) for i in range(len(gui_funcs))]
-def dust_plume_GUI_sub(stardata, n_orb):
+def dust_plume_custom(stardata, n_orb, n_t=1000, n_points=400):
+    ''' A non-JIT-compiled version of `dust_plume()` with more room for customisation. 
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    n_orb : int
+        Number of orbits to simulate (i.e. number of dust shells to create)
+    n_t : int
+        Number of circles to generate per orbital period
+    n_points : int
+        Number of discrete points per circle
+    
+    Returns
+    -------
+    particles : jnp.array
+        The (3xN) array of particle positions for the point cloud. These are rotated to be in the plane
+        of the sky, and are in units of arcseconds. 
+    weights : jnp.array
+        The (1xN) array of particle weights, all in the range 0 to 1. A weight of 0 will not contribute
+        to the imaging or any post-processing (e.g. ray tracing with MCFOST).
+    '''
     phase = stardata['phase']%1
     
     period_s = stardata['period'] * 365.25 * 24 * 60 * 60
-    
-    n_orbits = n_orb
-    n_t = 1000       # circles per orbital period
-    n_points = 400   # points per circle
-    n_particles = n_points * n_t * n_orbits
-    n_time = n_t * n_orbits
+
+    n_particles = n_points * n_t * n_orb
+    n_time = n_t * n_orb
     theta = 2 * jnp.pi * jnp.linspace(0, 1, n_points)
-    times = period_s * jnp.linspace(phase, n_orbits + phase, n_time)
-    particles, weights = dust_plume_sub(theta, times, n_orbits, period_s, stardata)
+    times = period_s * jnp.linspace(phase, n_orb + phase, n_time)
+    particles, weights = dust_plume_sub(theta, times, n_orb, period_s, stardata)
     return particles, weights
 
 
@@ -877,6 +880,8 @@ def smooth_histogram2d_base(particles, weights, stardata, xedges, yedges, im_siz
 n = 256
 @jit
 def smooth_histogram2d(particles, weights, stardata):
+    '''
+    '''
     im_size = n
     
     x = particles[0, :]
@@ -889,6 +894,8 @@ def smooth_histogram2d(particles, weights, stardata):
     return smooth_histogram2d_base(particles, weights, stardata, xedges, yedges, im_size)
 @jit
 def smooth_histogram2d_w_bins(particles, weights, stardata, xbins, ybins):
+    '''
+    '''
     im_size = len(xbins)
     return smooth_histogram2d_base(particles, weights, stardata, xbins, ybins, im_size)
 
@@ -1039,6 +1046,8 @@ def spiral_gif(stardata):
     ani.save(f"animation.gif", writer='pillow', fps=fps)
     
 def plot_3d(particles, weights):
+    '''
+    '''
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     
@@ -1046,6 +1055,8 @@ def plot_3d(particles, weights):
     ax.scatter(particles[0, ::n], particles[1, ::n], particles[2, ::n], marker='.', s=100, alpha=0.1)
     
 def plot_orbit(stardata):
+    '''
+    '''
     ## plots orbits
     theta = np.linspace(0, 2 * np.pi, 100)
     r1 = stardata['p1'] / (1 + stardata['eccentricity'] * np.cos(theta))
@@ -1062,13 +1073,23 @@ def plot_orbit(stardata):
     
     
 def orbital_position(stardata):
+    ''' Calculates the positions of each star in the binary at the current phase.
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter dictionary
+    
+    Returns
+    -------
+    positions1, positions2: jnp.array
+        The positions of each star (in km) w.r.t. to the system barycentre at the current phase.
+    '''
     phase = stardata['phase']%1
     
-    period_s = stardata['period'] * 365.25 * 24 * 60 * 60
+    period_s = stardata['period'] * yr2s
     
     time = period_s * phase
     ecc = stardata['eccentricity']
-    # E, true_anomaly = kepler_solve(times, period_s, ecc)
     
     E = kepler(2 * jnp.pi * time / period_s, jnp.array([ecc]))
     true_anomaly = true_from_eccentric_anomaly(E, ecc)
@@ -1076,7 +1097,6 @@ def orbital_position(stardata):
     a1, a2 = calculate_semi_major(period_s, stardata['m1'], stardata['m2'])
     r1 = a1 * (1 - ecc * jnp.cos(E)) * 1e-3     # radius in km 
     r2 = a2 * (1 - ecc * jnp.cos(E)) * 1e-3
-    # ws_ratio = stardata['windspeed1'] / stardata['windspeed2']
     
     positions1 = jnp.array([jnp.cos(true_anomaly), 
                             jnp.sin(true_anomaly), 
@@ -1146,25 +1166,28 @@ def add_stars(xedges, yedges, H, stardata):
     return H
     
     
+def orbital_positions(stardata, n_t=100):
+    ''' Calculates the positions of each star in the binary over a whole orbit.
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter dictionary
+    n_t : int
+        The number of true anomaly points to calculate
     
-    
-def orbital_positions(stardata):
-    
+    Returns
+    -------
+    positions1, positions2: jnp.array
+        The positions of each star (in km) w.r.t. to the system barycentre across the orbit.
+    '''
     phase = stardata['phase']%1
     
-    period_s = stardata['period'] * 365.25 * 24 * 60 * 60
+    period_s = stardata['period'] * yr2s
     
     n_orbits = 1
-    n_t = 100       # circles per orbital period
-    n_points = 40   # points per circle
-    n_particles = n_points * n_t * n_orbits
-    n_time = n_t * n_orbits
-    theta = 2 * jnp.pi * jnp.linspace(0, 1, n_points)
-    times = period_s * jnp.linspace(phase, n_orbits + phase, n_time)
-    n_time = len(times)
-    n_t = n_time / n_orbits
+    times = period_s * jnp.linspace(phase, n_orbits + phase, n_t)
+
     ecc = stardata['eccentricity']
-    # E, true_anomaly = kepler_solve(times, period_s, ecc)
     
     E = kepler(2 * jnp.pi * times / period_s, jnp.array([ecc]))
     true_anomaly = true_from_eccentric_anomaly(E, ecc)
@@ -1172,11 +1195,10 @@ def orbital_positions(stardata):
     a1, a2 = calculate_semi_major(period_s, stardata['m1'], stardata['m2'])
     r1 = a1 * (1 - ecc * jnp.cos(E)) * 1e-3     # radius in km 
     r2 = a2 * (1 - ecc * jnp.cos(E)) * 1e-3
-    # ws_ratio = stardata['windspeed1'] / stardata['windspeed2']
     
     positions1 = jnp.array([jnp.cos(true_anomaly), 
                             jnp.sin(true_anomaly), 
-                            jnp.zeros(n_time)])
+                            jnp.zeros(n_t)])
     positions2 = jnp.copy(positions1)
     positions1 *= r1      # position in the orbital frame
     positions2 *= -r2     # position in the orbital frame
@@ -1184,6 +1206,20 @@ def orbital_positions(stardata):
     return positions1, positions2
 
 def transform_orbits(pos1, pos2, stardata):
+    ''' Transforms the positions of each star from the reference frame in the plane of the orbit
+        (in units of km) to in the reference frame on the plane of the sky (in units of arcsec).
+    Parameters
+    ----------
+    pos1, pos2 : jnp.array
+        Each (3xN) position array of the stars in the plane of the orbit (units of km)
+    stardata : dict
+        The system parameter file.
+    
+    Returns
+    -------
+    pos1, pos2 : jnp.array
+        The same stellar positions as before, but in arcsec in the plane of the sky.
+    '''
     pos1 = euler_angles(pos1, stardata['asc_node'], stardata['inclination'], stardata['arg_peri'])
     pos2 = euler_angles(pos2, stardata['asc_node'], stardata['inclination'], stardata['arg_peri'])
     pos1 = 60 * 60 * 180 / jnp.pi * jnp.arctan(pos1 / (stardata['distance'] * 3.086e13))
@@ -1268,6 +1304,23 @@ def orbit_spiral_gif(stardata):
     
 
 def generate_lightcurve(stardata, n=100, shells=1):
+    '''
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    n : int
+        The number of points to sample the light curve (between phases 0 and 1)
+    shells : int
+        The number of shells that contribute to the light curve
+    
+    Returns
+    -------
+    phases : jnp.array
+        (1xn) array of the linearly spaced phase samples of the light curve.
+    fluxes : jnp.array
+        (1xn) array of simulated fluxes of the system
+    '''
     phases = jnp.linspace(0, 1, n)
     fluxes = np.zeros(n)
     
@@ -1498,17 +1551,27 @@ def plume_velocity_map(particles, weights, stardata, velocity='LOS'):
 
 
 
-def mcfost_points(system, shells, shell_mass, filename):
+def mcfost_points(stardata, shells, shell_mass, filename):
+    ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
+    Once generated, you could use these points with MCFOST via:
+
+    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb
+    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb -img 1.6
+    
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    shells : int
+        The number of shells to generate
+    shell_mass : float
+        The mass (in units of Solar masses) of *each* dust shell
+    filename : str
+        The name of the file to save the points into. This *must* include a '.fits' suffix.
     '''
-    `mcfost system.para -density_file filename -img <wavelength>`
+    particles, weights = gui_funcs[shells - 1](stardata)
 
-
-    mcfost wr.para -df wrcube.fits -force_Mgas -fix_star -star_bb
-    mcfost wr.para -df wrcube.fits -force_Mgas -fix_star -star_bb -img 1.6
-    '''
-    particles, weights = gui_funcs[shells - 1](system)
-
-    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (system['distance'] * 3.086e13) # convert from angular coords back to physical coords
+    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
     particles /= AU2km  # MCFOST needs distances in au
 
     filter = np.where(weights > 0)[0]

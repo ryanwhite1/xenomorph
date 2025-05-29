@@ -64,15 +64,6 @@ plugins:
           python:
             options:
               docstring_style: "numpy"
-  # - mkdocstrings:
-  #     default_handler: python
-  #     handlers:
-  #       python:
-  #         paths: [src]
-  #         options:
-  #           docstring_style: "numpy"
-  #         rendering:
-  #           members_order: source
 
 markdown_extensions:
   # - mdx_math  #https://stackoverflow.com/questions/27882261/mkdocs-and-mathjax <- source!
