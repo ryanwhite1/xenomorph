@@ -1190,7 +1190,7 @@ plt.show()</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>A beautiful innermost shell! Now, chances are that you've seen the JWST image of WR140:</p>
-<p><img alt="drawing" src="assets/wr140-jwst.jpg" width="400"/></p>
+<p><img alt="WR140 JWST" src="assets/wr140-jwst.jpg" width="400"/></p>
 <p>How do we produce multiple shells at a time like that?</p>
 <p>This is a difficult thing to do at run time, since the xenomorph code is made in JAX which requires fixed length arrays for the just-in-time compilation. Fortunately, I've come up with a somewhat cursed solution for now: I have a list of pre-compiled functions for a given number of shells (up to and including 20). We can access the list like so</p>
 </div>
@@ -1324,6 +1324,14 @@ plt.show()</div>
     
     
       <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>
