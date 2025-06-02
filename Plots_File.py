@@ -79,6 +79,10 @@ def apep_plot(filename, custom_params={}):
     fig.savefig(f'Images/{filename}.pdf', dpi=400, bbox_inches='tight')
 
 def apep_plot_jwst(filename, custom_params={}):
+    import matplotlib
+    cmap = matplotlib.cm.get_cmap('hot')
+    rgba = cmap(0.)
+    
     star = wrb.apep.copy()
     
     for param in custom_params:
@@ -87,11 +91,13 @@ def apep_plot_jwst(filename, custom_params={}):
     particles, weights = gm.gui_funcs[2](star)
     X, Y, H = smooth_histogram2d_898(particles, weights, star)
     H = gm.add_stars(X[0, :], Y[:, 0], H, star)
-    fig, ax = plt.subplots(figsize=(4, 4))
-    ax.pcolormesh(X, Y, H, cmap='hot', vmin=0, vmax=0.7, rasterized=True)
-    ax.set(aspect='equal', xlabel='Relative RA (")', ylabel='Relative Dec (")')
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.pcolormesh(-X, Y, H, cmap='hot', vmin=0, vmax=0.7, rasterized=True)
+    ax.set(aspect='equal', xlabel='Relative RA (")', ylabel='Relative Dec (")', xlim=(-1.2*np.max(X), 1.2*np.max(X)))
     ax.yaxis.set_label_position("right")
     ax.yaxis.tick_right()
+    ax.xaxis.set_inverted(True)
+    ax.set_facecolor(rgba)
     
     fig.savefig(f'Images/{filename}.png', dpi=400, bbox_inches='tight')
     fig.savefig(f'Images/{filename}.pdf', dpi=400, bbox_inches='tight')
@@ -99,9 +105,7 @@ def apep_plot_jwst(filename, custom_params={}):
     fig2, ax2 = plt.subplots(figsize=(6, 5))
     ax2.pcolormesh(Y, X, np.fliplr(np.rot90(H, k=0)), cmap='hot', vmin=0, vmax=0.7, rasterized=True)
     ax2.set(aspect='equal', ylabel='Relative RA (")', xlabel='Relative Dec (")', ylim=(-1.2*np.max(X), 1.2*np.max(X)))
-    import matplotlib
-    cmap = matplotlib.cm.get_cmap('hot')
-    rgba = cmap(0.)
+    
     ax2.set_facecolor(rgba)
     # ax2.yaxis.set_label_position("right")
     # ax2.yaxis.tick_right()

@@ -598,6 +598,70 @@ def calculate_semi_major(period_s, m1, m2):
     return a1, a2
 
 
+def episodic_mean_anomaly(stardata):
+    ''' Calculates the mean anomalies corresponding to dust turn on/off given those true anomalies given in the stardata dict.
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter dictionary.
+    
+    Returns
+    -------
+    turn_on_mean_anom, turn_off_mean_anom : floats
+        The mean anomalies corresponding to turn on and turn off, respectively.
+    '''
+    ecc = stardata['eccentricity']
+    
+    ecc_factor = jnp.sqrt((1. - ecc) / (1. + ecc))
+    
+    max_anom = 180. - 1e-1  # we get errors when our turn on/off are at +/- 180 degrees exactly
+    
+    ## set our 'lower' true anomaly bound to be (-180, nu_on - 2 * sigma], where the sigma is our gradual turn on (i.e. we go up to 2 sigma gradual turn on)
+    turn_on_true_anom = jnp.max(jnp.array([-max_anom, stardata['turn_on'] - 2. * stardata['gradual_turn']]))
+    turn_on_true_anom = (jnp.deg2rad(turn_on_true_anom))%(2. * jnp.pi) 
+    turn_on_ecc_anom = 2. * zero_safe_arctan2(jnp.tan(turn_on_true_anom / 2.), 1./ecc_factor)
+    turn_on_mean_anom = turn_on_ecc_anom - ecc * jnp.sin(turn_on_ecc_anom)
+
+    ## set our 'upper' true anomaly bound to be [nu_off + 2 * sigma, 180), where the sigma is our gradual turn off (i.e. we go up to 2 sigma gradual turn off)
+    turn_off_true_anom = jnp.min(jnp.array([max_anom, stardata['turn_off'] + 2. * stardata['gradual_turn']]))
+    turn_off_true_anom = (jnp.deg2rad(turn_off_true_anom))%(2. * jnp.pi) 
+    turn_off_ecc_anom = 2. * zero_safe_arctan2(jnp.tan(turn_off_true_anom / 2.), 1./ecc_factor)
+    turn_off_mean_anom = turn_off_ecc_anom - ecc * jnp.sin(turn_off_ecc_anom)
+    
+    return turn_on_mean_anom, turn_off_mean_anom
+
+def ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, n_orbits, n_t):
+    ''' Calculates the ages (in seconds) of each ring in the point cloud.
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter dictionary.
+    turn_on_mean_anom, turn_off_mean_anom : floats
+        The mean anomalies corresponding to turn on and turn off, respectively.
+    n_orbits : int
+        The number of shells that are being produced
+    n_t : int
+        The number of rings per shell
+    
+    Returns
+    -------
+    ring_ages : jnp.array
+        The ages (in seconds) of each ring throughout all of the shells. Ages are given in descending order (so the oldest rings are at the earliest indices).
+    '''
+    shell_times = jnp.arange(n_orbits)
+    shell_times = jnp.repeat(shell_times, n_t)
+    # now shell_times will be an array like [1, 1, 1, ..., 2, 2, 2, ..., 3, ..., n_orbits, n_orbits]
+    
+    phase_radians = 2. * jnp.pi * stardata['phase']
+    non_dimensional_times = jnp.linspace(turn_on_mean_anom, turn_off_mean_anom, n_t)
+    non_dimensional_times = (non_dimensional_times%(2.*jnp.pi) - phase_radians) / (2. * jnp.pi)
+    non_dimensional_times = non_dimensional_times%1.
+    non_dimensional_times = jnp.tile(non_dimensional_times, n_orbits)
+    
+    non_dimensional_times = shell_times + non_dimensional_times # get ring ages in terms of orbital phase
+    
+    return stardata['period'] * yr2s * (n_orbits - non_dimensional_times) # convert to real units 
+
 
 def dust_plume_sub(theta, times, n_orbits, period_s, stardata):
     '''
@@ -626,57 +690,19 @@ def dust_plume_sub(theta, times, n_orbits, period_s, stardata):
     weights : jnp.array of float (1 x N_particles)
         A weighting for each particle in the point cloud (used mainly for the imaging step). Each number should be
         between 0 and 1.
-
     '''
-    
-    n_time = len(times)
-    n_t = int(n_time / n_orbits)
+    n_time = len(times)             # total number of rings
+    n_t = int(n_time / n_orbits)    # number of rings per orbit
     ecc = stardata['eccentricity']
+    period_s = stardata['period'] * yr2s
     
-    ecc_factor = jnp.sqrt((1. - ecc) / (1. + ecc))
-    
-    max_anom = 180. - 1e-1  # we get errors when our turn on/off are at +/- 180 degrees exactly
-    
-    ## set our 'lower' true anomaly bound to be (-180, nu_on - 2 * sigma], where the sigma is our gradual turn on (i.e. we go up to 2 sigma gradual turn on)
-    turn_on_true_anom = jnp.max(jnp.array([-max_anom, stardata['turn_on'] - 2. * stardata['gradual_turn']]))
-    turn_on_true_anom = (jnp.deg2rad(turn_on_true_anom))%(2. * jnp.pi) 
-    # turn_on_ecc_anom = 2. * jnp.arctan(ecc_factor * jnp.tan(turn_on_true_anom / 2.))
-    turn_on_ecc_anom = 2. * zero_safe_arctan2(jnp.tan(turn_on_true_anom / 2.), 1./ecc_factor)
-    turn_on_mean_anom = turn_on_ecc_anom - ecc * jnp.sin(turn_on_ecc_anom)
-    
-    # turn_on_mean_anom = zero_safe_arctan2(-jnp.sqrt(1 - ecc**2) * jnp.sin(turn_on_true_anom), -ecc - jnp.cos(turn_on_true_anom)) + jnp.pi - ecc * (jnp.sqrt(1 - ecc**2) * jnp.sin(turn_on_true_anom)) / (1 + ecc * jnp.cos(turn_on_true_anom))
-    
-    # turn_off_true_anom = jnp.deg2rad(stardata['turn_off']) + jnp.pi 
-    ## set our 'upper' true anomaly bound to be [nu_off + 2 * sigma, 180), where the sigma is our gradual turn off (i.e. we go up to 2 sigma gradual turn off)
-    turn_off_true_anom = jnp.min(jnp.array([max_anom, stardata['turn_off'] + 2. * stardata['gradual_turn']]))
-    turn_off_true_anom = (jnp.deg2rad(turn_off_true_anom))%(2. * jnp.pi) 
-    # turn_off_ecc_anom = 2. * jnp.arctan(ecc_factor * jnp.tan(turn_off_true_anom / 2.))
-    turn_off_ecc_anom = 2. * zero_safe_arctan2(jnp.tan(turn_off_true_anom / 2.), 1./ecc_factor)
-    turn_off_mean_anom = turn_off_ecc_anom - ecc * jnp.sin(turn_off_ecc_anom)
-    
-    # print(turn_on_mean_anom, turn_off_mean_anom)
-    
-    # turn_off_mean_anom = zero_safe_arctan2(-jnp.sqrt(1 - ecc**2) * jnp.sin(turn_off_true_anom), -ecc - jnp.cos(turn_off_true_anom)) + jnp.pi - ecc * (jnp.sqrt(1 - ecc**2) * jnp.sin(turn_off_true_anom)) / (1 + ecc * jnp.cos(turn_off_true_anom))
-    
-    # print(turn_on_mean_anom)
-    # print(turn_off_mean_anom)
-    # mean_anomalies = jnp.linspace(turn_on_mean_anom, turn_off_mean_anom + 2 * jnp.pi, len(times))%(2 * jnp.pi)
-
-    # mean_anomalies = jnp.linspace(turn_on_mean_anom, turn_off_mean_anom, len(times))%(2 * jnp.pi)
+    turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
     
     delta_M = turn_off_mean_anom - turn_on_mean_anom
     mean_anomalies = ((jnp.linspace(stardata['phase'], n_orbits + stardata['phase'], len(times))%1) * delta_M + turn_on_mean_anom)%(2. * jnp.pi)
     
-    
-    phase_radians = 2. * jnp.pi * stardata['phase']
-    # mean_anomalies = (jnp.linspace(0, delta_M, len(times)) + turn_on_mean_anom)%(2. * jnp.pi)
     mean_anomalies = (jnp.linspace(0., delta_M, n_t) + turn_on_mean_anom)%(2. * jnp.pi)
     mean_anomalies = jnp.tile(mean_anomalies, n_orbits)
-    # mean_anomalies = jnp.where((phase_radians < turn_off_mean_anom) or (phase_radians > (turn_on_mean_anom%(2*jnp.pi))), 
-    #                            mean_anomalies - phase_radians)
-    
-    
-    # print(mean_anomalies)
     
     E = kepler(mean_anomalies, jnp.array([ecc]))
     true_anomaly = true_from_eccentric_anomaly(E, ecc)
@@ -692,36 +718,16 @@ def dust_plume_sub(theta, times, n_orbits, period_s, stardata):
     positions1 *= r1      # position in the orbital frame
     positions2 *= -r2     # position in the orbital frame
     
-    # turn_on_mean_anom, turn_off_... are in range (-pi, pi]. Need to add pi to get in range (0, 2pi], then divide by 2pi to get in range (0, 1].
+    ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, n_orbits, n_t) # get the ring ages
     
-    shell_times = jnp.arange(n_orbits)
-    shell_times = jnp.repeat(shell_times, n_t)
-    
-    non_dimensional_times = jnp.linspace(turn_on_mean_anom, turn_off_mean_anom, n_t)
-    non_dimensional_times = (non_dimensional_times%(2.*jnp.pi) - phase_radians) / (2. * jnp.pi)
-    non_dimensional_times = non_dimensional_times%1.
-    non_dimensional_times = jnp.tile(non_dimensional_times, n_orbits)
-    
-    non_dimensional_times = shell_times + non_dimensional_times
-    
-    widths = nonlinear_accel(period_s * (n_orbits - non_dimensional_times), stardata)
-    widths = widths * period_s * (n_orbits - non_dimensional_times)
-
+    widths = nonlinear_accel(ages, stardata) * ages
     
     plume_direction = positions1 - positions2               # get the line of sight from first star to the second in the orbital frame
     
-        
     particles = vmap(lambda i_nu: dust_circle(i_nu, stardata, theta, plume_direction, widths))((jnp.arange(n_time), true_anomaly))
-
-
-
-
-
-
 
     weights = particles[:, 3, :].flatten()
     particles = particles[:, :3, :]
-    
     
     particles = jnp.array([jnp.ravel(particles[:, 0, :]),
                            jnp.ravel(particles[:, 1, :]),
@@ -1442,16 +1448,62 @@ def plume_velocity_map(particles, weights, stardata, velocity='LOS'):
     
     particle_speeds = anisotropy_speeds * stardata['windspeed1'] * velocity_mult / radii
     
-    # fig, ax = plt.subplots()
-    # n = 10
-    # scatter = ax.scatter(particles[0, ::n], particles[1, ::n], c=particle_speeds[::n], alpha=0.1 * weights[::n], cmap=cmap)
-    # ax.set(aspect='equal', xlabel='Relative RA (")', ylabel='Relative Dec (")')
-    # ax.set_facecolor('k')
-    # fig.colorbar(scatter, label='Recoverable Velocity in POS (km/s)')
-    
     return particle_speeds, fig_args
 
+def radial_velocity_structure(stardata, shells=1, bins=10, n_t=1000, n_points=400):
+    '''
+    '''
+    particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
     
+    turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
+    
+    ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, n_orbits, n_t)
+    
+    velocities = nonlinear_accel(ring_ages, stardata)
+    
+    particle_velocities = jnp.repeat(velocities, n_points)
+    
+    radial_velocities = particle_velocities * -particles[2, :] / radii
+
+
+def mcfost_points(stardata, shells, shell_mass, filename):
+    ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
+    Once generated, you could use these points with MCFOST via:
+
+    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb
+    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb -img 1.6
+    
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    shells : int
+        The number of shells to generate
+    shell_mass : float
+        The mass (in units of Solar masses) of *each* dust shell
+    filename : str
+        The name of the file to save the points into. This *must* include a '.fits' suffix.
+    '''
+    particles, weights = gui_funcs[shells - 1](stardata)
+
+    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
+    particles /= AU2km  # MCFOST needs distances in au
+
+    filter = np.where(weights > 0)[0]
+
+    particles = particles[:, filter]
+    weights = weights[filter]
+
+    masses = shell_mass * shells * weights / jnp.sum(weights)
+
+    particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug!)
+
+    from astropy.io import fits
+
+    fits_masses = fits.PrimaryHDU(masses)
+    fits_positions = fits.ImageHDU(particles.T)
+    hdul = fits.HDUList([fits_masses, fits_positions])
+    hdul.writeto(filename, overwrite=True)
 
 # print(ring_velocities(wrb.apep_aniso.copy(), 1, 400))
 
@@ -1551,44 +1603,7 @@ def plume_velocity_map(particles, weights, stardata, velocity='LOS'):
 
 
 
-def mcfost_points(stardata, shells, shell_mass, filename):
-    ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
-    Once generated, you could use these points with MCFOST via:
 
-    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb
-    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb -img 1.6
-    
-    Parameters
-    ----------
-    stardata : dict
-        The system parameter file.
-    shells : int
-        The number of shells to generate
-    shell_mass : float
-        The mass (in units of Solar masses) of *each* dust shell
-    filename : str
-        The name of the file to save the points into. This *must* include a '.fits' suffix.
-    '''
-    particles, weights = gui_funcs[shells - 1](stardata)
-
-    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
-    particles /= AU2km  # MCFOST needs distances in au
-
-    filter = np.where(weights > 0)[0]
-
-    particles = particles[:, filter]
-    weights = weights[filter]
-
-    masses = shell_mass * shells * weights / jnp.sum(weights)
-
-    particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug!)
-
-    from astropy.io import fits
-
-    fits_masses = fits.PrimaryHDU(masses)
-    fits_positions = fits.ImageHDU(particles.T)
-    hdul = fits.HDUList([fits_masses, fits_positions])
-    hdul.writeto(filename, overwrite=True)
 
 
 
