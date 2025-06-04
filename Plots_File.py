@@ -499,7 +499,7 @@ def Apep_image_fit():
     
 
     X_jwst, Y_jwst, H_jwst = Apep_JWST_reference(2550)
-    axes[1, 2].pcolormesh(X_jwst, Y_jwst, H_jwst, cmap='hot', rasterized=True)
+    axes[1, 2].pcolormesh(-X_jwst, Y_jwst, H_jwst, cmap='hot', rasterized=True)
     maxside_jwst = np.max(np.abs(np.array([X_jwst, Y_jwst])))
     axes[1, 2].set(xlim=(-maxside_jwst, maxside_jwst), ylim=(-maxside_jwst, maxside_jwst))
 
@@ -509,10 +509,10 @@ def Apep_image_fit():
     particles, weights = gm.dust_plume(starcopy)
     X, Y, H_original = smooth_histogram2d(particles, weights, starcopy)
     H_original = gm.add_stars(X[0, :], Y[:, 0], H_original, starcopy)
-    axes[0, 0].pcolormesh(X, Y, H_original, cmap='binary', rasterized=True)
+    axes[0, 0].pcolormesh(-X, Y, H_original, cmap='binary', rasterized=True)
     axes[0, 0].set(aspect='equal', ylabel='Relative Dec (")', xlim=(-8, 8), ylim=(-8, 8))
     # axes[0, 0].set_facecolor('k')
-    axes[0, 0].text(-7, 6, 'Model', c='k')
+    axes[0, 0].text(7, 6, 'Model', c='k')
     
     starcopy['histmax'] = 1.
 
@@ -523,8 +523,8 @@ def Apep_image_fit():
     # H_3shell = gm.add_stars(X_3shell[0, :], Y_3shell[:, 0], H_3shell, starcopy_3shell)
     # jwst_mesh = jwst_mesh.ravel()
     norm = colors.Normalize(vmin=-1., vmax=1.)
-    jwst_diff_mesh = axes[1, 2].pcolormesh(X_jwst, Y_jwst, H_3shell - H_jwst, cmap='seismic', norm=norm, rasterized=True)
-    axes[1, 2].text(-45, 40, 'JWST', c='k')
+    jwst_diff_mesh = axes[1, 2].pcolormesh(-X_jwst, Y_jwst, H_3shell - H_jwst, cmap='seismic', norm=norm, rasterized=True)
+    axes[1, 2].text(45, 40, 'JWST', c='k')
     # the_divider = make_axes_locatable(axes[1, 2])
     # color_axis = the_divider.append_axes("right", size="5%", pad=0.1)
     fig.colorbar(jwst_diff_mesh, cax=cbar_ax, label='Difference')
@@ -538,6 +538,7 @@ def Apep_image_fit():
                     axes[j, i].set(ylabel='Relative Dec (")')
             else:
                 axes[j, i].set(aspect='equal')
+            
                 
     year_inds = {2016:[0, 1], 2017:[0, 2], 2018:[1, 0], 2024:[1, 1], 'jwst':[1, 2]}
 
@@ -550,11 +551,15 @@ def Apep_image_fit():
         year_starcopy['phase'] += (year - 2024) / year_starcopy['period']
         particles, weights = gm.dust_plume(year_starcopy)
         X_year, Y_year, H_year = smooth_histogram2d_w_bins(particles, weights, year_starcopy, X_ref[0, :], Y_ref[:, 0])
-        H_year = gm.add_stars(X_ref[0, :], Y_ref[:, 0], H_year, starcopy)
+        H_year = gm.add_stars(-X_ref[0, :], Y_ref[:, 0], H_year, starcopy)
         
-        axes[a, b].pcolormesh(X_ref, Y_ref, H_year - H_ref, cmap='seismic', norm=norm, rasterized=True)
+        axes[a, b].pcolormesh(-X_ref, Y_ref, H_year - H_ref, cmap='seismic', norm=norm, rasterized=True)
         axes[a, b].set(xlim=(-8, 8), ylim=(-8, 8))
-        axes[a, b].text(-7, 6, f'{year}', c='k')
+        axes[a, b].text(7, 6, f'{year}', c='k')
+    
+    for j in [0, 1]:
+        for i in range(0, 3):
+            axes[j, i].xaxis.set_inverted(True)
         
     fig.savefig('Images/Apep_Fit.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/Apep_Fit.pdf', dpi=400, bbox_inches='tight')
@@ -1946,7 +1951,7 @@ def poster_plot(transparent=False):
 def main():
     # apep_plot('Apep_Plot')
     # apep_plot('Apep_Plot_No_Photodiss', custom_params={'comp_reduction':0})
-    apep_plot_jwst('Apep_Plot_JWST', custom_params={'histmax':0.5, 'lum_power':0.6})
+    # apep_plot_jwst('Apep_Plot_JWST', custom_params={'histmax':0.5, 'lum_power':0.6})
     # apep_cone_plot()
     # apep_rotate_gif()
     
@@ -1960,7 +1965,7 @@ def main():
     # Apep_Velocity_Map(velocity='POS')
     
     # Apep_JWST_mosaic()
-    # Apep_image_fit()
+    Apep_image_fit()
     # apep_tertiary_movement()
     
     # Apep_flipbook(pages=98)
