@@ -1945,6 +1945,23 @@ def poster_plot(transparent=False):
     # fig.savefig('Images/Skeleton_CWB_Basic.png', dpi=400, bbox_inches='tight')
     # fig.savefig('Images/Skeleton_CWB_Basic.pdf', dpi=400, bbox_inches='tight')
 
+
+def apep_orbit():
+    pos1, pos2 = gm.orbital_positions(wrb.apep.copy())
+
+    pos1, pos2 = gm.transform_orbits(pos1, pos2, wrb.apep.copy())
+
+    fig, ax = plt.subplots()
+    ax.plot(-pos1[0, :], pos1[1, :], c='k', label='WN star')
+    ax.plot(-pos2[0, :], pos2[1, :], c='tab:blue', label='WC star')
+
+    ax.xaxis.set_inverted(True)
+
+    ax.set(xlabel='Relative RA (")', ylabel='Relative Dec (")')
+    ax.legend()
+
+    fig.savefig('Images/apep_orbit.png', dpi=400, bbox_inches='tight')
+
     
 
     
@@ -1965,7 +1982,7 @@ def main():
     # Apep_Velocity_Map(velocity='POS')
     
     # Apep_JWST_mosaic()
-    Apep_image_fit()
+    # Apep_image_fit()
     # apep_tertiary_movement()
     
     # Apep_flipbook(pages=98)
@@ -1986,9 +2003,11 @@ def main():
     
     # book_chapter_plot()
     # poster_plot()
-    poster_plot(transparent=True)
+    # poster_plot(transparent=True)
     
     # WR104_proposal_plot()
+
+    apep_orbit()
     
 
 

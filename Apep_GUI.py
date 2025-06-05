@@ -15,13 +15,12 @@ from scipy.ndimage import gaussian_filter
 import jax.scipy.signal as signal
 from matplotlib import animation
 import time
-import emcee
 from astropy.io import fits
 from glob import glob
 import os
 
-import src.xenomorph.geometry as gm
-import src.xenomorph.systems as wrb
+import xenomorph.geometry as gm
+import xenomorph.systems as wrb
 
 ### --- GUI Plot --- ###
 
