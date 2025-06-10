@@ -1,7 +1,6 @@
 LICENSE
 README.md
 pyproject.toml
-src/xenomorph/Apep_GUI.py
 src/xenomorph/__init__.py
 src/xenomorph/geometry.py
 src/xenomorph/gui.py

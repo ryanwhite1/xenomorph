@@ -1450,23 +1450,92 @@ def plume_velocity_map(particles, weights, stardata, velocity='LOS'):
     
     return particle_speeds, fig_args
 
-def radial_velocity_structure(stardata, shells=1, bins=10, n_t=1000, n_points=400):
-    '''
+def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
+    ''' Yields the points belonging to each equally-sized velocity bin between the fastest receding and approaching radial velocity points.
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    shells : int
+        The number of shells to generate
+    bins : int
+        The number of velocity bins with which to bin the data between vmax and vmin (equally sized bins)
+    n_t : int
+        The number of rings to generate in each shell
+    n_points : int
+        The number of points to generate in each ring
+    
+    Returns
+    -------
+    velocity_structure : dict
+        A dictionary with keywords 'bin_width' (the width of each velocity bin), 'bin_centres' (a 1xbins) array of velocities that are the centre of each bin,
+        and an int keyword for each bin centre where each is a dict of {'particles':(3x?), 'weights':(1x?)} of the particles that correspond to the bin with that central velocity.
+    particles : jnp.array (3xN)
+        The particle positions (point cloud), returned as a convenient way to later get the histogram bins when imaging. 
     '''
     particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
     
     turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
+    _ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, shells, n_t)
+    radii = jnp.linalg.norm(particles, axis=0)
     
-    ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, n_orbits, n_t)
-    
-    velocities = nonlinear_accel(ring_ages, stardata)
-    
+    velocities = nonlinear_accel(_ring_ages, stardata)
     particle_velocities = jnp.repeat(velocities, n_points)
-    
     radial_velocities = particle_velocities * -particles[2, :] / radii
+    
+    fast_approach, fast_recede = np.max(radial_velocities), jnp.min(radial_velocities)
+    
+    bin_width = (fast_approach - fast_recede) / bins
+    bin_centres = np.linspace(fast_recede + bin_width / 2, fast_approach - bin_width / 2, bins)
+    
+    velocity_structure = {'bin_width':bin_width, 'bin_centres':bin_centres}
+    
+    for i, centre in enumerate(bin_centres):
+        # find all of the particles that are in this radial velocity bin
+        if i != bins:
+            indices = np.where((radial_velocities >= (centre - bin_width/2)) & \
+                                (radial_velocities < (centre + bin_width/2)))
+        else:
+            indices = np.where(radial_velocities >= (centre - bin_width/2))
+        
+        sub_dict = {'particles':particles[:, indices], 'weights':weights[indices]}
+        
+        velocity_structure[centre] = sub_dict
+    
+    return velocity_structure, particles
+
+def radial_velocity_cube(stardata, velocity_structure, particles, resolution=600):
+    '''
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    velocity_structure : dict
+        A dictionary with keywords 'bin_width' (the width of each velocity bin), 'bin_centres' (a 1xbins) array of velocities that are the centre of each bin,
+        and an int keyword for each bin centre where each is a dict of {'particles':(3x?), 'weights':(1x?)} of the particles that correspond to the bin with that central velocity.
+    particles : jnp.array (3xN)
+        The particle positions (point cloud), returned as a convenient way to later get the histogram bins when imaging. 
+    resolution : int
+        The side-length for the imaging histogram. Default = 600 pixels
+    Returns
+    -------
+    velocity_cube : jnp.array (resolution+1 x resolution+1 x bins)
+    '''
+    velocity_cube = np.zeros((resolution+1, resolution+1, len(velocity_structure['bin_centres'])))
+    
+    xbound, ybound = np.max(jnp.abs(particles[0, :])), np.max(jnp.abs(particles[1, :]))
+    bound = np.max(np.array([xbound, ybound])) * (1. + 2. / resolution)
+    xedges, yedges = np.linspace(-bound, bound, resolution+1), np.linspace(-bound, bound, resolution+1)
+    
+    for i, centre in enumerate(velocity_structure['bin_centres']):
+        bin_particles, bin_weights = velocity_structure[centre]['particles'], velocity_structure[centre]['weights']
+        _, _, H = smooth_histogram2d_w_bins(bin_particles, bin_weights, stardata, xedges, yedges)
+        velocity_cube[:, :, i] = H
+    
+    return velocity_cube, xedges, yedges
 
 
-def mcfost_points(stardata, shells, shell_mass, filename):
+def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400):
     ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
     Once generated, you could use these points with MCFOST via:
 
