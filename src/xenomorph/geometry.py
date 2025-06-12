@@ -1504,7 +1504,7 @@ def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
     
     for i, centre in enumerate(bin_centres):
         # find all of the particles that are in this radial velocity bin
-        if i != bins:
+        if i != len(bin_centres):
             indices = np.where((radial_velocities >= (centre - bin_widths[i]/2)) & \
                                 (radial_velocities < (centre + bin_widths[i]/2)))
         else:
@@ -1517,7 +1517,7 @@ def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
     return velocity_structure, particles
 
 def radial_velocity_cube(stardata, velocity_structure, particles, resolution=600):
-    '''
+    ''' <NEED DESCRIPTION>
     Parameters
     ----------
     stardata : dict
