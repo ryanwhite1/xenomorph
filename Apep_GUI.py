@@ -340,7 +340,7 @@ ws1.set(starcopy['windspeed1'])
 ws2 = tkinter.Scale(root, from_=0, to=5e3, orient=tkinter.HORIZONTAL,
                     command=lambda v: update_frequency('windspeed2', v), label="Secondary v_wind (km/s)", resolution=5)
 ws2.set(starcopy['windspeed2'])
-period = tkinter.Scale(root, from_=0, to=300, orient=tkinter.HORIZONTAL,
+period = tkinter.Scale(root, from_=0, to=600, orient=tkinter.HORIZONTAL,
                         command=lambda v: update_frequency('period', v), label="Orb. Period (yr)", resolution=2)
 period.set(starcopy['period'])
 osd = tkinter.Scale(root, from_=0, to=180, orient=tkinter.HORIZONTAL,

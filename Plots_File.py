@@ -1959,6 +1959,12 @@ def apep_orbit():
 
     ax.set(xlabel='Relative RA (")', ylabel='Relative Dec (")')
     ax.legend()
+    
+    positions1, positions2 = gm.orbital_position(wrb.apep.copy())
+    positions1, positions2 = gm.transform_orbits(positions1, positions2, wrb.apep.copy())
+    
+    ax.scatter(-positions1[0], positions1[1], c='k')
+    ax.scatter(-positions2[0], positions2[1], c='k')
 
     fig.savefig('Images/apep_orbit.png', dpi=400, bbox_inches='tight')
 

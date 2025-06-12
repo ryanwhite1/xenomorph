@@ -1451,7 +1451,8 @@ def plume_velocity_map(particles, weights, stardata, velocity='LOS'):
     return particle_speeds, fig_args
 
 def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
-    ''' Yields the points belonging to each equally-sized velocity bin between the fastest receding and approaching radial velocity points.
+    ''' Yields the points belonging to each equally-sized velocity bin between the fastest receding and approaching radial velocity points. 
+        Convention is that negative radial velocity = towards the viewer.
     Parameters
     ----------
     stardata : dict
