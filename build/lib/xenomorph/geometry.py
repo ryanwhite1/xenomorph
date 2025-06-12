@@ -1459,8 +1459,12 @@ def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
         The system parameter file.
     shells : int
         The number of shells to generate
-    bins : int
-        The number of velocity bins with which to bin the data between vmax and vmin (equally sized bins)
+    bins : int or dict
+        if int:
+            The number of velocity bins with which to bin the data between vmax and vmin (equally sized bins)
+        if dict:
+            A dictionary with two keywords: 'bin_widths' and 'bin_centres', where the data on each keyword is a (1 x bins) array corresponding to 
+            each bin width and each bin centre. In this way, you can have irregularly sized/spaced bins.
     n_t : int
         The number of rings to generate in each shell
     n_points : int
@@ -1469,7 +1473,7 @@ def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
     Returns
     -------
     velocity_structure : dict
-        A dictionary with keywords 'bin_width' (the width of each velocity bin), 'bin_centres' (a 1xbins) array of velocities that are the centre of each bin,
+        A dictionary with keywords 'bin_widths' (a 1xbins array with the width of each velocity bin), 'bin_centres' (a 1xbins) array of velocities that are the centre of each bin,
         and an int keyword for each bin centre where each is a dict of {'particles':(3x?), 'weights':(1x?)} of the particles that correspond to the bin with that central velocity.
     particles : jnp.array (3xN)
         The particle positions (point cloud), returned as a convenient way to later get the histogram bins when imaging. 
@@ -1486,18 +1490,24 @@ def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
     
     fast_approach, fast_recede = np.max(radial_velocities), jnp.min(radial_velocities)
     
-    bin_width = (fast_approach - fast_recede) / bins
-    bin_centres = np.linspace(fast_recede + bin_width / 2, fast_approach - bin_width / 2, bins)
+    if type(bins) == int:
+        # then we want linearly spaced and equally sized bins
+        bin_widths = jnp.ones(bins) * (fast_approach - fast_recede) / bins
+        bin_centres = np.linspace(fast_recede + bin_widths[0] / 2, fast_approach - bin_widths[0] / 2, bins)
+    elif type(bins) == dict:
+        # then the user has provided (possibly) irregularly sized and/or spaced bins
+        bin_widths = bins['bin_widths']
+        bin_centres = bins['bin_centres']
     
-    velocity_structure = {'bin_width':bin_width, 'bin_centres':bin_centres}
+    velocity_structure = {'bin_widths':bin_widths, 'bin_centres':bin_centres}
     
     for i, centre in enumerate(bin_centres):
         # find all of the particles that are in this radial velocity bin
         if i != bins:
-            indices = np.where((radial_velocities >= (centre - bin_width/2)) & \
-                                (radial_velocities < (centre + bin_width/2)))
+            indices = np.where((radial_velocities >= (centre - bin_widths[i]/2)) & \
+                                (radial_velocities < (centre + bin_widths[i]/2)))
         else:
-            indices = np.where(radial_velocities >= (centre - bin_width/2))
+            indices = np.where(radial_velocities >= (centre - bin_widths[i]/2))
         
         sub_dict = {'particles':particles[:, indices], 'weights':weights[indices]}
         
@@ -1512,7 +1522,7 @@ def radial_velocity_cube(stardata, velocity_structure, particles, resolution=600
     stardata : dict
         The system parameter file.
     velocity_structure : dict
-        A dictionary with keywords 'bin_width' (the width of each velocity bin), 'bin_centres' (a 1xbins) array of velocities that are the centre of each bin,
+        A dictionary with keywords 'bin_widths' (a 1xbins array with the width of each velocity bin), 'bin_centres' (a 1xbins) array of velocities that are the centre of each bin,
         and an int keyword for each bin centre where each is a dict of {'particles':(3x?), 'weights':(1x?)} of the particles that correspond to the bin with that central velocity.
     particles : jnp.array (3xN)
         The particle positions (point cloud), returned as a convenient way to later get the histogram bins when imaging. 
@@ -1521,6 +1531,10 @@ def radial_velocity_cube(stardata, velocity_structure, particles, resolution=600
     Returns
     -------
     velocity_cube : jnp.array (resolution+1 x resolution+1 x bins)
+        An array with a 2d image (histogram) for each velocity bin. Images are usually in increasing order in terms of radial velocity, but they'll be in exactly
+        the same order as the central bin values in `velocity_structure`.
+    xedges, yedges : np.array (resolution+1 x resolution+1)
+        The pixel border coordinates in the x and y directions of the image.
     '''
     velocity_cube = np.zeros((resolution+1, resolution+1, len(velocity_structure['bin_centres'])))
     

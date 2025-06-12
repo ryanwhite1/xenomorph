@@ -92,6 +92,7 @@ nav:
     - Tutorials:
       - Plotting a Spiral:         tutorials/First_Spiral.ipynb
       - The xenomorph GUI:         tutorials/gui.ipynb
+      - Velocity Slicing a Nebula: tutorials/velocity_cube.ipynb
     
     - Reference:
       - Geometry: Reference/geometry.md
