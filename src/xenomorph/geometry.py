@@ -1462,6 +1462,7 @@ def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
     bins : int or dict
         if int:
             The number of velocity bins with which to bin the data between vmax and vmin (equally sized bins)
+            
         if dict:
             A dictionary with two keywords: 'bin_widths' and 'bin_centres', where the data on each keyword is a (1 x bins) array corresponding to 
             each bin width and each bin centre. In this way, you can have irregularly sized/spaced bins. The onus is on the user to make sure that
@@ -1517,7 +1518,7 @@ def radial_velocity_points(stardata, shells=1, bins=10, n_t=1000, n_points=400):
     return velocity_structure, particles
 
 def radial_velocity_cube(stardata, velocity_structure, particles, resolution=600):
-    ''' <NEED DESCRIPTION>
+    ''' Calculates the column density of particles for each sliced velocity bin, and outputs the corresponding data cube. 
     Parameters
     ----------
     stardata : dict
@@ -1532,7 +1533,7 @@ def radial_velocity_cube(stardata, velocity_structure, particles, resolution=600
     Returns
     -------
     velocity_cube : jnp.array (resolution+1 x resolution+1 x bins)
-        An array with a 2d image (histogram) for each velocity bin. Images are usually in increasing order in terms of radial velocity, but they'll be in exactly
+        An array with a 2D image (histogram) for each velocity bin. Images are usually in increasing order in terms of radial velocity, but they'll be in exactly
         the same order as the central bin values in `velocity_structure`.
     xedges, yedges : np.array (resolution+1 x resolution+1)
         The pixel border coordinates in the x and y directions of the image.
