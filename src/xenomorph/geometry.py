@@ -1551,6 +1551,40 @@ def radial_velocity_cube(stardata, velocity_structure, particles, resolution=600
     
     return velocity_cube, xedges, yedges
 
+def output_points(stardata, shells, filename, n_t=1000, n_points=400):
+    ''' Saves a (4 x ~shells*n_t*n_points) file in .npy format, where the first 3 axes are the x-y-z spatial coordinates of the points (in AU) 
+        relative to the system CoM, and the 4th axis are the weights of each point. 
+    
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    shells : int
+        The number of shells to generate
+    shell_mass : float
+        The mass (in units of Solar masses) of *each* dust shell
+    filename : str
+        The name of the file to save the points into. A '.npy' extension will automatically be added to the end.
+    n_t : int
+        The number of rings to generate in each shell
+    n_points : int
+        The number of points to generate in each ring
+    '''
+    particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
+
+    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
+    particles /= AU2km  # MCFOST needs distances in au
+
+    filter = np.where(weights > 0)[0]
+
+    particles = particles[:, filter]
+    weights = weights[filter]
+
+    output = np.zeros((4, len(weights)))
+    output[:3, :] = particles
+    output[-1, :] = weights
+    
+    np.save(filename, output)
 
 def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400):
     ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
@@ -1569,8 +1603,12 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
         The mass (in units of Solar masses) of *each* dust shell
     filename : str
         The name of the file to save the points into. This *must* include a '.fits' suffix.
+    n_t : int
+        The number of rings to generate in each shell
+    n_points : int
+        The number of points to generate in each ring
     '''
-    particles, weights = gui_funcs[shells - 1](stardata)
+    particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
 
     particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
     particles /= AU2km  # MCFOST needs distances in au
