@@ -1600,7 +1600,8 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     shells : int
         The number of shells to generate
     shell_mass : float
-        The mass (in units of Solar masses) of *each* dust shell
+        The mass (in units of Solar masses) of *each* dust shell. This assumes MCFOST is using a 1:100 dust:gas mass ratio, so the actual mass will be
+        multiplied by 100. That is, the user-entered mass here is just for the dust.
     filename : str
         The name of the file to save the points into. This *must* include a '.fits' suffix.
     n_t : int
@@ -1618,7 +1619,7 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     particles = particles[:, filter]
     weights = weights[filter]
 
-    masses = shell_mass * shells * weights / jnp.sum(weights)
+    masses = 1e2 * shell_mass * shells * weights / jnp.sum(weights)
 
     particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug!)
 
