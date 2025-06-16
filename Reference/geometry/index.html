@@ -419,6 +419,8 @@
       
         
       
+        
+      
     
     
     
@@ -440,7 +442,7 @@
   
   
   <span class="md-ellipsis">
-    Reference
+    API Reference
     
   </span>
   
@@ -451,7 +453,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
-            Reference
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -889,6 +891,29 @@
   
   <span class="md-ellipsis">
     Systems
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcfost/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MCFOST
     
   </span>
   
@@ -4367,22 +4392,6 @@ and 'term_windspeed' (float; the final windspeed of the plume at t-&gt;inf) are 
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>shell_mass</code>
-            </td>
-            <td>
-                  <code><span title="float">float</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The mass (in units of Solar masses) of <em>each</em> dust shell</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                 <code>filename</code>
             </td>
             <td>
@@ -4466,9 +4475,7 @@ and 'term_windspeed' (float; the final windspeed of the plume at t-&gt;inf) are 
 <span class="normal">1582</span>
 <span class="normal">1583</span>
 <span class="normal">1584</span>
-<span class="normal">1585</span>
-<span class="normal">1586</span>
-<span class="normal">1587</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output_points</span><span class="p">(</span><span class="n">stardata</span><span class="p">,</span> <span class="n">shells</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">n_t</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
+<span class="normal">1585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output_points</span><span class="p">(</span><span class="n">stardata</span><span class="p">,</span> <span class="n">shells</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">n_t</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39; Saves a (4 x ~shells*n_t*n_points) file in .npy format, where the first 3 axes are the x-y-z spatial coordinates of the points (in AU) </span>
 <span class="sd">        relative to the system CoM, and the 4th axis are the weights of each point. </span>
 
@@ -4478,8 +4485,6 @@ and 'term_windspeed' (float; the final windspeed of the plume at t-&gt;inf) are 
 <span class="sd">        The system parameter file.</span>
 <span class="sd">    shells : int</span>
 <span class="sd">        The number of shells to generate</span>
-<span class="sd">    shell_mass : float</span>
-<span class="sd">        The mass (in units of Solar masses) of *each* dust shell</span>
 <span class="sd">    filename : str</span>
 <span class="sd">        The name of the file to save the points into. A &#39;.npy&#39; extension will automatically be added to the end.</span>
 <span class="sd">    n_t : int</span>

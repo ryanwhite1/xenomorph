@@ -18,6 +18,8 @@
         <link rel="prev" href="../gui/">
       
       
+        <link rel="next" href="../mcfost/">
+      
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
@@ -417,6 +419,8 @@
       
         
       
+        
+      
     
     
     
@@ -438,7 +442,7 @@
   
   
   <span class="md-ellipsis">
-    Reference
+    API Reference
     
   </span>
   
@@ -449,7 +453,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
-            Reference
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -565,6 +569,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#xenomorph.systems.apep" class="md-nav__link">
+    <span class="md-ellipsis">
+      apep
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#xenomorph.systems.print_systems" class="md-nav__link">
     <span class="md-ellipsis">
       print_systems
@@ -577,6 +590,29 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcfost/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MCFOST
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -619,6 +655,15 @@
   <a href="#xenomorph.systems" class="md-nav__link">
     <span class="md-ellipsis">
       systems
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#xenomorph.systems.apep" class="md-nav__link">
+    <span class="md-ellipsis">
+      apep
     </span>
   </a>
   
@@ -677,6 +722,28 @@
 
 
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="xenomorph.systems.apep" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">apep</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;m1&#39;</span><span class="p">:</span> <span class="mf">15.0</span><span class="p">,</span> <span class="s1">&#39;m2&#39;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span> <span class="s1">&#39;eccentricity&#39;</span><span class="p">:</span> <span class="mf">0.82</span><span class="p">,</span> <span class="s1">&#39;inclination&#39;</span><span class="p">:</span> <span class="mf">23.8</span><span class="p">,</span> <span class="s1">&#39;asc_node&#39;</span><span class="p">:</span> <span class="mf">164.1</span><span class="p">,</span> <span class="s1">&#39;arg_peri&#39;</span><span class="p">:</span> <span class="mf">10.6</span><span class="p">,</span> <span class="s1">&#39;open_angle&#39;</span><span class="p">:</span> <span class="mf">126.0</span><span class="p">,</span> <span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mf">193.0</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">:</span> <span class="mf">2400.0</span><span class="p">,</span> <span class="s1">&#39;windspeed1&#39;</span><span class="p">:</span> <span class="mf">1024.0</span><span class="p">,</span> <span class="s1">&#39;windspeed2&#39;</span><span class="p">:</span> <span class="mf">2400.0</span><span class="p">,</span> <span class="s1">&#39;turn_on&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">108.0</span><span class="p">,</span> <span class="s1">&#39;turn_off&#39;</span><span class="p">:</span> <span class="mf">141.0</span><span class="p">,</span> <span class="s1">&#39;gradual_turn&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s1">&#39;oblate&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;nuc_dist&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;opt_thin_dist&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;term_windspeed&#39;</span><span class="p">:</span> <span class="mi">860</span><span class="p">,</span> <span class="s1">&#39;accel_rate&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">5.0</span><span class="p">,</span> <span class="s1">&#39;orb_sd&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;orb_amp&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;orb_min&#39;</span><span class="p">:</span> <span class="mf">180.0</span><span class="p">,</span> <span class="s1">&#39;az_sd&#39;</span><span class="p">:</span> <span class="mf">30.0</span><span class="p">,</span> <span class="s1">&#39;az_amp&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;az_min&#39;</span><span class="p">:</span> <span class="mf">90.0</span><span class="p">,</span> <span class="s1">&#39;comp_incl&#39;</span><span class="p">:</span> <span class="mf">124.0</span><span class="p">,</span> <span class="s1">&#39;comp_az&#39;</span><span class="p">:</span> <span class="mf">238.8</span><span class="p">,</span> <span class="s1">&#39;comp_open&#39;</span><span class="p">:</span> <span class="mf">90.0</span><span class="p">,</span> <span class="s1">&#39;comp_reduction&#39;</span><span class="p">:</span> <span class="mf">1.75</span><span class="p">,</span> <span class="s1">&#39;comp_plume&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;comp_plume_sd&#39;</span><span class="p">:</span> <span class="mf">20.0</span><span class="p">,</span> <span class="s1">&#39;comp_plume_max&#39;</span><span class="p">:</span> <span class="mf">373.0</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span><span class="p">:</span> <span class="mf">0.35</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;histmax&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;lum_power&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;spin_inc&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;spin_Omega&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;windspeed_polar&#39;</span><span class="p">:</span> <span class="mi">2400</span><span class="p">,</span> <span class="s1">&#39;aniso_vel_mult&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.2</span><span class="p">,</span> <span class="s1">&#39;aniso_vel_power&#39;</span><span class="p">:</span> <span class="mf">3.53</span><span class="p">,</span> <span class="s1">&#39;open_angle_polar&#39;</span><span class="p">:</span> <span class="mf">180.0</span><span class="p">,</span> <span class="s1">&#39;aniso_OA_mult&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.05</span><span class="p">,</span> <span class="s1">&#39;aniso_OA_power&#39;</span><span class="p">:</span> <span class="mf">3.53</span><span class="p">,</span> <span class="s1">&#39;star1amp&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s1">&#39;star1sd&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="s1">&#39;star2amp&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s1">&#39;star2sd&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="s1">&#39;star3amp&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s1">&#39;star3sd&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.12</span><span class="p">,</span> <span class="s1">&#39;star3dist&#39;</span><span class="p">:</span> <span class="mf">1700.0</span><span class="p">}</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apep</p>
+
+    </div>
+
+</div>
 
 
 
