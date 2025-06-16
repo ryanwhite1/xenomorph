@@ -4,6 +4,7 @@ pyproject.toml
 src/xenomorph/__init__.py
 src/xenomorph/geometry.py
 src/xenomorph/gui.py
+src/xenomorph/mcfost.py
 src/xenomorph/systems.py
 src/xenomorph.egg-info/PKG-INFO
 src/xenomorph.egg-info/SOURCES.txt

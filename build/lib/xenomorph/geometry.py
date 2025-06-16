@@ -1586,49 +1586,6 @@ def output_points(stardata, shells, filename, n_t=1000, n_points=400):
     
     np.save(filename, output)
 
-def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400):
-    ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
-    Once generated, you could use these points with MCFOST via:
-
-    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb
-    mcfost <system>.para -df <filename> -force_Mgas -fix_star -star_bb -img 1.6
-    
-    Parameters
-    ----------
-    stardata : dict
-        The system parameter file.
-    shells : int
-        The number of shells to generate
-    shell_mass : float
-        The mass (in units of Solar masses) of *each* dust shell
-    filename : str
-        The name of the file to save the points into. This *must* include a '.fits' suffix.
-    n_t : int
-        The number of rings to generate in each shell
-    n_points : int
-        The number of points to generate in each ring
-    '''
-    particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
-
-    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
-    particles /= AU2km  # MCFOST needs distances in au
-
-    filter = np.where(weights > 0)[0]
-
-    particles = particles[:, filter]
-    weights = weights[filter]
-
-    masses = shell_mass * shells * weights / jnp.sum(weights)
-
-    particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug!)
-
-    from astropy.io import fits
-
-    fits_masses = fits.PrimaryHDU(masses)
-    fits_positions = fits.ImageHDU(particles.T)
-    hdul = fits.HDUList([fits_masses, fits_positions])
-    hdul.writeto(filename, overwrite=True)
-
 # print(ring_velocities(wrb.apep_aniso.copy(), 1, 400))
 
 # system = wrb.apep.copy()
