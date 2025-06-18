@@ -94,10 +94,11 @@ nav:
       - The xenomorph GUI:         tutorials/gui.ipynb
       - Velocity Slicing a Nebula: tutorials/velocity_cube.ipynb
     
-    - Reference:
+    - API Reference:
       - Geometry: Reference/geometry.md
       - GUI: Reference/gui.md
       - Systems: Reference/systems.md
+      - MCFOST: Reference/mcfost.md
             
 
     # - FAQ & Troubleshooting: faq.md

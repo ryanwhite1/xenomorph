@@ -39,8 +39,10 @@ apep = {"m1":15.,                # solar masses
         "spin_inc":0., "spin_Omega":0.,
         "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0.7, 'star1sd':-0.7, 'star2amp':0.7, 'star2sd':-0.7, 'star3amp':0.7, 'star3sd':-1.12, 'star3dist':1700.}
+'''Apep'''
 def apep_refs():
-        for ref in ["White et al. 2025 - in prep.", "Han et al. 2020 - 2020MNRAS.498.5604H", "Callingham et al. 2020 - 2020MNRAS.495.3323C"]:
+        for ref in ["White et al. 2025 - in prep.", "Han et al. 2025 - in prep", "Han et al. 2020 - 2020MNRAS.498.5604H", 
+                    "Callingham et al. 2020 - 2020MNRAS.495.3323C"]:
                 print(ref)
 # apep_aniso = {"m1":15.,                # solar masses
 #         "m2":10.,                # solar masses
@@ -176,7 +178,7 @@ WR48a = {"m1":15.,                  # solar masses
         "spin_inc":0., "spin_Omega":0., 
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
-
+'''WR48a'''
 # WR48a2 = {"m1":15.,                  # solar masses
 #         "m2":10.,                   # solar masses
 #         "eccentricity":0.7, 
@@ -231,7 +233,7 @@ WR104 = {"m1":10.,                # solar masses
         "spin_inc":0., "spin_Omega":0., 
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
-
+'''WR104'''
 # below are rough params for WR 112
 WR112 = {"m1":15.,                # solar masses
         "m2":10.,                # solar masses
@@ -259,7 +261,9 @@ WR112 = {"m1":15.,                # solar masses
         "spin_inc":0., "spin_Omega":0.,
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
+'''WR112'''
 def WR112_refs():
+        ''''''
         for ref in ["Lau et al. 2020 - 2020ApJ...900..190L"]:
                 print(ref)
 
@@ -290,6 +294,7 @@ WR125 = {"m1":15.,                # solar masses
         "spin_inc":0., "spin_Omega":0., 
         "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
+'''WR125'''
 
 # below are rough params for WR 137
 WR137 = {"m1":10.,                # solar masses
@@ -318,7 +323,9 @@ WR137 = {"m1":10.,                # solar masses
         "spin_inc":0., "spin_Omega":0., 
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
+'''WR137'''
 def WR137_refs():
+        ''''''
         for ref in ["Richardson et al. 2024 - 2024ApJ...977...78R"]:
                 print(ref)
 
@@ -349,7 +356,9 @@ WR140 = {"m1":8.4,                # solar masses
         "spin_inc":0., "spin_Omega":0.,
         "windspeed_polar":240.0, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.}
+'''WR140'''
 def WR140_refs():
+        ''''''
         for ref in ["Han et al. 2022 - 2022Natur.610..269H", "Lau et al. 2022 - 2022NatAs...6.1308L"]:
                 print(ref)
 
