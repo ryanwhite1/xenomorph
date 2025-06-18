@@ -1561,8 +1561,6 @@ def output_points(stardata, shells, filename, n_t=1000, n_points=400):
         The system parameter file.
     shells : int
         The number of shells to generate
-    shell_mass : float
-        The mass (in units of Solar masses) of *each* dust shell
     filename : str
         The name of the file to save the points into. A '.npy' extension will automatically be added to the end.
     n_t : int
