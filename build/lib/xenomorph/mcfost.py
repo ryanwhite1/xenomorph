@@ -44,8 +44,9 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
 
     # assign masses to each point
     masses = 1e2 * shell_mass * shells * weights / jnp.sum(weights)     # the 1e2 factor assumes a 1:100 dust:gas mass ratio, and these are actually the gas masses
-
-    particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost!)
+    
+    # particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost!)
+    particles *= np.random.normal(1, 5e-5, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost!)
 
     from astropy.io import fits
 

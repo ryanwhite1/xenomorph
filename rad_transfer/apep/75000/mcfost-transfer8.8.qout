@@ -1,0 +1,176 @@
+HOSTNAME = dave38
+HOSTTYPE = x86_64
+Time is Tue Jun 17 10:00:54 AEST 2025
+Directory is /fred/oz045/rwhite/xenomorph
+Starting mcfost...
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Checking apep_1shell_light_few.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Thermal equilibrium calculation
+ Temperature calculation under LTE approximation
+ Parallelized code on   8 processors
+  
+Tue Jun 17 10:00:54 AEST 2025
+ Creating directory ./rad_transfer/apep/75000/./data_th
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/Draine_Si_sUV.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: apep_1shell_light_few.fits
+ Done
+  
+ # Farthest particules :
+ x =  -15652.7020028589        15163.7079924993     
+ y =  -14855.0684500122        14147.2762172688     
+ z =  -15961.3097198365        13943.0805338873     
+ Found       64007  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -15652.7021484375        15163.7080078125     
+ y =  -14855.0683593750        14147.2763671875     
+ z =  -15961.3095703125        13943.0800781250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on        64005 SPH particles
+ mcfost will require ~   2.685757     MB of temporary memory for the tesselation
+ Trying to allocate   3.507854     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours =  9909
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.04s
+ Found       64005 cells
+ Neighbours list size =      919563
+ Average number of neighbours =   14.36705    
+ Voronoi volume =   5655896541329.31     
+ Using n_cells =       64005
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9995967E-09  Msun
+ Total dust mass in model :  9.9995963E-11  Msun
+ Reference cell is #           1
+ Using       64005 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   50000.00     K
+ Done
+ Reading dust properties from previous run ... Done
+ lambda =  0.854080274425481     
+ Integ tau dans plan eq. =   2.0347266E-09
+  Column density (g/cm^2)   =   1.7958837E-13
+ Integ tau (i =75.0 deg)   =  0.23027E-08
+  Column density (g/cm^2)   =   2.0323832E-13
+ No dark zone
+ Initializing thermal properties ... Done
+ Initialization complete in  0.32s
+ Computing temperature structure ...
+   0% |                                                  |   2% |=                                                 |   2% |=                                                 |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  14% |=======                                           |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Max. temperature =    194.5119    
+ Temperature calculation complete in  1.34s
+ Source fct time  0.0000000E+00 s
+ RT time          0.0000000E+00 s
+ Processing complete in  1.34s
+ CPU time used           9.66s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Checking apep_1shell_light_few.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   8.800000      microns
+ Parallelized code on   8 processors
+  
+Tue Jun 17 10:00:56 AEST 2025
+ Creating directory ./rad_transfer/apep/75000/./data_8.8
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/Draine_Si_sUV.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: apep_1shell_light_few.fits
+ Done
+  
+ # Farthest particules :
+ x =  -15652.7020028589        15163.7079924993     
+ y =  -14855.0684500122        14147.2762172688     
+ z =  -15961.3097198365        13943.0805338873     
+ Found       64007  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -15652.7021484375        15163.7080078125     
+ y =  -14855.0683593750        14147.2763671875     
+ z =  -15961.3095703125        13943.0800781250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on        64005 SPH particles
+ mcfost will require ~   2.685757     MB of temporary memory for the tesselation
+ Trying to allocate   3.507854     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours =  9909
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.03s
+ Found       64005 cells
+ Neighbours list size =      919563
+ Average number of neighbours =   14.36705    
+ Voronoi volume =   5655896541329.31     
+ Using n_cells =       64005
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9995967E-09  Msun
+ Total dust mass in model :  9.9995963E-11  Msun
+ Reference cell is #           1
+ Using       64005 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   50000.00     K
+ Done
+ Integ tau dans plan eq. =   3.6865805E-10
+  Column density (g/cm^2)   =   1.7958839E-13
+ Integ tau (i =75.0 deg)   =  0.41721E-09
+  Column density (g/cm^2)   =   2.0323832E-13
+ 
+ Dust properties in cell #           1
+ g               5.1247936E-02
+ albedo          1.2384152E-02
+ Reading temperature file : ./rad_transfer/apep/75000/./data_th/Temperature.fits
+ .gz
+ frac. energy emitted by star(s) :   0.9999578    
+ Initialization complete in  0.14s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h 16m 46s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Done
+ Time =   0h 16m 59s
+ Source fct time  7.7000000E-03 s
+ RT time           13.10650     s
+ Processing complete in   0h 16m 59s
+ CPU time used            2h 13m 47s
+
++------------------ Job Report: 1256071 (COMPLETED) -------------------+
+| Memory (RAM)  [                    ]  2.3% (94.1 MB peak / 4 GB)     |
+| CPU           [################### ] 97.8% average                   |
+| Time          [>                   ]  2.9% (0-00:17:07 / 0-10:00:00) |
+|                                                                      |
+| Lustre Filesystem:                                                   |
+|   Path    Total Read    Total Write      Total IOPS                  |
+|   ------  ------------  -------------  ------------                  |
+|   /apps   504 KB        0 B                     28                   |
+|   /fred   96 MB         322.3 KB               102                   |
+|   /home   4 KB          0 B                      3                   |
+|                                                                      |
+| Warnings:                                                            |
+|   - Too much memory requested                                        |
+|   - Too much time requested                                          |
++----------------------------------------------------------------------+
