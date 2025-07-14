@@ -3,6 +3,9 @@ Modelling the morphology of Wolf-Rayet Colliding Wind Binary dust nebulae with f
 
 ![Apep](Images/Apep_evolution_pretty.gif)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15875502.svg)](https://doi.org/10.5281/zenodo.15875502)
+
+
 ## Installation
 Currently the only way is to build from source. To do this, clone this repository and run
 ```
