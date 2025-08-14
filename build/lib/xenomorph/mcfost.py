@@ -5,12 +5,13 @@ import jax.numpy as jnp
 import numpy as np
 import io
 from astropy.io import fits
+import matplotlib.pyplot as plt
 
 import src.xenomorph.geometry as gm
 import src.xenomorph.systems as wrb
 
 
-def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400, root_dir=''):
+def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400, resolution=600, root_dir=''):
     ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
     Once generated, you could use these points with MCFOST via:
 
@@ -22,16 +23,18 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     stardata : dict
         The system parameter file.
     shells : int
-        The number of shells to generate
+        The number of shells to generate.
     shell_mass : float
         The mass (in units of Solar masses) of *each* dust shell. This assumes MCFOST is using a 1:100 dust:gas mass ratio, so the actual mass will be
         multiplied by 100. That is, the user-entered mass here is just for the dust.
     filename : str
         The name of the file to save the points into. This *must* include a '.fits' suffix.
     n_t : int
-        The number of rings to generate in each shell
+        The number of rings to generate in each shell.
     n_points : int
-        The number of points to generate in each ring
+        The number of points to generate in each ring.
+    resolution : int
+        The number of pixels (per side) for the geometric comparison image.
     root_dir : str
         The directory where you'd like the output of the job to be.
     '''
@@ -40,6 +43,18 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     else:
         save_dir = root_dir
     particles, weights = gm.dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
+
+    # make an image of what we expect from the stock geometric model so we can compare with the radiative transfer output
+    fig, ax = plt.subplots()
+    xbound, ybound = jnp.max(jnp.abs(particles[0, :])), jnp.max(jnp.abs(particles[1, :]))
+    bound = jnp.max(jnp.array([xbound, ybound])) * (1. + 2. / resolution)
+    pixel_bins = jnp.linspace(-bound, bound, resolution+1)
+    X, Y, H = gm.smooth_histogram2d_w_bins(particles, weights, stardata, pixel_bins, pixel_bins)
+    ax.pcolormesh(-X, Y, H, cmap='hot', rasterized=True)
+    ax.set(aspect='equal', ylabel='Relative Dec (")', xlabel='Relative RA (")')
+    ax.invert_xaxis()
+    fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300)
+
 
     particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
     particles /= gm.AU2km  # MCFOST needs distances in au
@@ -60,8 +75,17 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     hdul = fits.HDUList([fits_masses, fits_positions])
     hdul.writeto(save_dir + filename, overwrite=True)
 
+
+
 def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=2e6, resolution=600, gas_2_dust=100, root_dir=''):
-    '''
+    '''WIP -- Generates a .para file to be used in the MCFOST run. 
+    Note:
+     - The dust mass *must* be set at run time (through the density_file provided)
+    Assumes:
+     - Amorphous carbon dust
+    Todo:
+     - allow multiple stars to be generated in the para file.
+     - generate the para file inside the root_dir?
     Parameters
     ----------
     paraname : str
@@ -81,12 +105,17 @@ def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=
     root_dir : str
         The directory where you'd like the output of the job to be.
     '''
-    data = fits.open(density_file)
+    if root_dir != '':
+        write_dir = f'{root_dir}/'
+    else:
+        write_dir = ''
+    # first, let's start by calculating our (physical) image size (in au) from the given density file 
+    data = fits.open(write_dir + density_file)
     particles = data[1].data
     particles = np.abs(particles)
-    img_bound = 1.05 * 2 * np.max(particles[:, :2])
+    img_bound = 1.05 * 2 * np.max(particles[:, :2]) # want it slightly bigger than twice the radius from the origin, in the projection of the sky (hence the :2 slice)
 
-    parafile = io.open(f'{paraname}.para', 'w', newline='\n')
+    parafile = io.open(f'{write_dir + paraname}.para', 'w', newline='\n')
 
     parafile.write("4.1                      mcfost version\n\n"+\
                     "#Number of photon packages\n"+\
@@ -131,7 +160,7 @@ def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=
     parafile.write("#Grain properties\n"+\
                     "  1  Number of species\n"+\
                     "  Mie  1 2  0.0  1.0  0.9 Grain type (Mie or DHS), N_components, mixing rule (1 = EMT or 2 = coating),  porosity, mass fraction, Vmax (for DHS)\n"+\
-                    "  Draine_Si_sUV.dat  1.0  Optical indices file, volume fraction\n"+\
+                    "  ac_opct.dat  1.0  Optical indices file, volume fraction\n"+\
                     "  1	                  Heating method : 1 = RE + LTE, 2 = RE + NLTE, 3 = NRE\n"+\
                     "  0.03  1.0 3.5 100 	  amin, amax [mum], aexp, n_grains (log distribution)\n\n")
     parafile.write("#Molecular RT settings\n"+\
@@ -140,7 +169,7 @@ def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=
                     "  1			  Number of molecules\n"+\
                     "  co.dat 6                molecular data filename, level max up to which NLTE populations are calculated\n"+\
                     "  T 1.e-4 abundance.fits.gz   cst molecule abundance ?, abundance, abundance file\n"+\
-                    "  T  2                       ray tracing ?,  number of lines in ray-tracing\n"+\
+                    "  F  2                       ray tracing ?,  number of lines in ray-tracing\n"+\
                     "  2 3	 		  transition numbers\n"+\
                     "  -10.0 10.0 40     	  vmin and vmax [km/s], number of velocity bins betwen 0 and vmax\n\n")
     parafile.write("#Atoms settings / share some informations with molecules\n"+\
@@ -156,7 +185,6 @@ def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=
                     " 60000.0	6.0	15.0	0.0	0.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
                     " lte4000-3.5.NextGen.fits.gz\n"+\
                     " 0.0	2.2  fUV, slope_fUV\n")
-
 
     parafile.close()
 
@@ -206,7 +234,7 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
         email_lines = ['\n']
 
     hashed_lines = ["#!/bin/bash\n", "#SBATCH --ntasks=1\n", f"#SBATCH --cpus-per-task={cpus}\n",
-                    f"#SBATCH --job-name={job_name}\n", f"#SBATCH --output={write_dir + job_name + str(wavelength)}.qout\n",
+                    f"#SBATCH --job-name={job_name}\n", f"#SBATCH --output={job_name + str(wavelength)}.qout\n",
                     f"#SBATCH --time=0-{run_hours}:00:00\n", f"#SBATCH --mem={memory}G\n"]
     for email_line in email_lines:
         hashed_lines.extend(email_line)
@@ -217,10 +245,10 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     environment_lines = ['ulimit -s unlimited\n', f'source {mcfost_setup}\n', f'export OMP_NUM_THREADS={cpus}\n', 
                          '\n', 'echo "Starting mcfost..."\n', '\n']
 
-    mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb -root_dir {root_dir}\n',
-                    f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength} -root_dir {root_dir}\n']
+    mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb\n',
+                    f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}\n']
 
-    slurmfile = io.open(f'{slurmname}.q', 'w', newline='\n')
+    slurmfile = io.open(f'{write_dir + slurmname}.q', 'w', newline='\n')
 
     slurmfile.writelines(hashed_lines)
     slurmfile.writelines(initialise_lines)

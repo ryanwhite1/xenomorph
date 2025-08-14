@@ -3,7 +3,8 @@ name = "xenomorph"
 from . import (
     geometry,
     gui,
-    systems
+    systems,
+    mcfost
 )
 
 __all__ = []
