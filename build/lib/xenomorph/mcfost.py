@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 import src.xenomorph.geometry as gm
 import src.xenomorph.systems as wrb
 
+stef_boltz = 5.670374419e-8     # W/m^2/K^4
+solar_radius = 696340000        # m
+solar_lum = 3.83e+26             # W
+
 
 def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400, resolution=600, root_dir=''):
     ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
@@ -53,7 +57,7 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     ax.pcolormesh(-X, Y, H, cmap='hot', rasterized=True)
     ax.set(aspect='equal', ylabel='Relative Dec (")', xlabel='Relative RA (")')
     ax.invert_xaxis()
-    fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300)
+    fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300, bbox_inches='tight')
 
 
     particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
@@ -77,17 +81,19 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
 
 
 
-def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=2e6, resolution=600, gas_2_dust=100, root_dir=''):
+def generate_para(stardata, paraname, density_file, distance=2400, photons=1e7, T_photons=1e7, resolution=600, gas_2_dust=100, root_dir=''):
     '''WIP -- Generates a .para file to be used in the MCFOST run. 
     Note:
      - The dust mass *must* be set at run time (through the density_file provided)
     Assumes:
      - Amorphous carbon dust
+     - Each star is effectively right in the centre of the dust cloud (well within 1au of the centre)
     Todo:
-     - allow multiple stars to be generated in the para file.
-     - generate the para file inside the root_dir?
+     - specify the grain distribution in of the dust
     Parameters
     ----------
+    stardata : dict
+        The system parameter file.
     paraname : str
         The name that you'd like to give to this parameter file. A '.para' is automatically appended to the end of this input.
     density_file : str
@@ -150,6 +156,7 @@ def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=
                     "  F  1e-5		  viscous heating, alpha_viscosity\n\n"+\
                     "#Number of zones : 1 zone = 1 density structure + corresponding grain properties\n"+\
                     "  1                       needs to be 1 if you read a density file (phantom or fits file)\n\n")
+    # in the below block, the dust mass is given from the density_file, so we only specify the gas-to-dust mass ratio
     parafile.write("#Density structure\n"+\
                     "  3                       zone type : 1 = disk, 2 = tappered-edge disk, 3 = envelope, 4 = debris disk, 5 = wall\n"+\
                     f"  1.e-15    {gas_2_dust:.1f}		  dust mass,  gas-to-dust mass ratio\n"+\
@@ -180,9 +187,14 @@ def generate_para(paraname, density_file, distance=2400, photons=1e7, T_photons=
                     " 1000 101	vmax (km/s), n_points for ray-traced images and total flux\n"+\
                     " T 1		images (T) or total flux (F) ? Number of lines for images\n"+\
                     " 3 2		upper level -> lower level (Atomic model dependent)\n\n")
+
+    num_stars = 2 if stardata['star3dist'] == 0 else 3
     parafile.write("#Star properties\n"+\
-                    " 1 Number of stars\n"+\
-                    " 60000.0	6.0	15.0	0.0	0.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
+                    f" {num_stars} Number of stars\n")
+    for star in range(num_stars):
+        star_radius = jnp.sqrt(10**stardata[f'star{star+1}lum'] * solar_lum / (4 * jnp.pi * stardata[f'star{star+1}temp']**4 * stef_boltz))     # use the stefan boltzmann law to calculate stellar radius
+        star_radius /= solar_radius     # convert from m to R_sun (needed for MCFOST)
+        parafile.write(f" {stardata[f'star{star+1}temp']:.1f}	{star_radius:.1f}	15.0	0.{star}	0.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
                     " lte4000-3.5.NextGen.fits.gz\n"+\
                     " 0.0	2.2  fUV, slope_fUV\n")
 
