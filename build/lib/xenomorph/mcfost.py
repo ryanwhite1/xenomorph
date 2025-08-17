@@ -14,6 +14,15 @@ stef_boltz = 5.670374419e-8     # W/m^2/K^4
 solar_radius = 696340000        # m
 solar_lum = 3.83e+26             # W
 
+H_band_samples = {1.45 : 0.0715157, 1.5328 : 0.662124, 1.56397 : 0.652174, 1.634 : 0.687081, 1.7 : 0.637728, 1.78 : 0.05}
+for wavelength in H_band_samples:
+    H_band_samples[wavelength] *= 1.2464    # the transmittances used above are for the blocked H filter, so need to multiply all the transmittance vals
+K_band_samples = {1.9654 : 0.049453, 2.079 : 0.798509, 2.1645 : 0.803215, 2.3 : 0.766, 2.3708 : 0.75372, 2.457 : 0.016607}
+L_band_samples = {3.1309 : 0.01, 3.23 : 0.921975, 3.7037 : 0.925085, 3.751 : 0.9036, 3.89408 : 0.0108354}
+M_band_samples = {4.4484 : 0.010919, 4.6 : 0.81075, 4.708 : 0.840764, 4.8828 : 0.90181, 5.0454 : 0.79153, 5.11247 : 0.86137, 5.27426 : 0.010345}
+
+bandpasses = {'H': H_band_samples, 'K': K_band_samples, 'L': L_band_samples, 'M': M_band_samples}
+
 def trapezoid_rule(x1, x2, y1, y2):
     ''' Calculates the area of the trapezoid made by two points.
     Parameters
@@ -122,7 +131,7 @@ def generate_para(stardata, paraname, density_file, distance=2400, photons=1e7, 
      - The dust mass *must* be set at run time (through the density_file provided)
     Assumes:
      - Amorphous carbon dust
-     - Each star is effectively right in the centre of the dust cloud (well within 1au of the centre)
+     - Each star is effectively right in the centre of the dust cloud (well within 5au of the centre)
     Todo:
      - specify the grain distribution in of the dust
     Parameters
@@ -245,7 +254,8 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     Todo:
      - Generate multiple runs at different wavelengths covering various bandpasses, to be used in interpolation later. Can do this
         by setting the wavelength as a string for a given filter.
-            - Filter bandpasses (J,H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
+            - Filter bandpasses (H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
+            - I am omitting the J band as it doesn't represent appreciable dust formation
 
     Parameters
     ----------
@@ -298,8 +308,12 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     environment_lines = ['ulimit -s unlimited\n', f'source {mcfost_setup}\n', f'export OMP_NUM_THREADS={cpus}\n', 
                          '\n', 'echo "Starting mcfost..."\n', '\n']
 
-    mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb\n',
-                    f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}\n']
+    mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb\n']
+    if type(wavelength) == str:
+        for lambda_sample in bandpasses[wavelength].keys():
+            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {lambda_sample}\n')
+    else:
+        mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}\n')
 
     slurmfile = io.open(f'{write_dir + slurmname}.q', 'w', newline='\n')
 
