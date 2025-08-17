@@ -222,12 +222,39 @@ WR137 = {"m1":10.,                # solar masses
         "spin_inc":0., "spin_Omega":0., 
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
-        'star1lum':5.5, 'star1temp':45000, 'star2lum':5, 'star2temp':20000}
+        'star1lum':5.6, 'star1temp':60000, 'star2lum':5.2, 'star2temp':32000}
 '''WR137'''
 def WR137_refs():
         ''''''
-        for ref in ["Richardson et al. 2024 - 2024ApJ...977...78R"]:
+        for ref in ["Richardson et al. 2024 - 2024ApJ...977...78R", "Star lums: St-Louis et al 2020 - 2020MNRAS.497.4448S, Star Temps: Richardson et al 2016 - 2016MNRAS.461.4115R"]:
                 print(ref)
+
+WR137alt = {'m1': 9.5, 
+        'm2': 17.3, 
+        'eccentricity': 0.315, 
+        'inclination': 97.2, 
+        'asc_node': 155.0, 
+        'arg_peri': 1.0, 
+        'open_angle': 24.0, 
+        'period': 13.1, 
+        'distance': 2040.0, 
+        'windspeed1': 1700.0, 
+        'windspeed2': 1700.0, 
+        'turn_on': -159.0, 
+        'turn_off': 85.0, 
+        'gradual_turn': 2.6, 
+        'oblate': 0.0, 'nuc_dist': 0.1, 'opt_thin_dist': 2.0, 
+        'term_windspeed': 1700.0, 'accel_rate': -5.0, 
+        'orb_sd': 53.0, 'orb_amp': 1.0, 'orb_min': 322.9, 'az_sd': 5.3, 'az_amp': -0.88, 'az_min': 21.2, 
+        'comp_incl': 0.0, 'comp_az': 0.0, 'comp_open': 0.0, 'comp_reduction': 0.0, 'comp_plume': 0.0, 
+        'comp_plume_sd': 0.0, 'comp_plume_max': 0.0, 
+        'phase': 0.16, 
+        'sigma': 3.24, 
+        'histmax': 1.0, 'lum_power': 0.47, 
+        'spin_inc': 0.0, 'spin_Omega': 0.0, 
+        'windspeed_polar': 1700.0, 'aniso_vel_mult': -6.30, 'aniso_vel_power': 1.99, 'open_angle_polar': 0.0, 'aniso_OA_mult': -5.30, 'aniso_OA_power': 3.53, 
+        'star1amp': 1.0, 'star1sd': -0.588, 'star2amp': 2.520, 'star2sd': -3.0, 'star3amp': 0.0, 'star3sd': -1.0, 'star3dist': 0.0,
+        'star1lum':5.6, 'star1temp':60000, 'star2lum':5.2, 'star2temp':32000}
 
 # below are rough params for WR 140
 WR140 = {"m1":8.4,                # solar masses

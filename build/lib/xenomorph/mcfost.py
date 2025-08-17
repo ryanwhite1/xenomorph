@@ -14,6 +14,38 @@ stef_boltz = 5.670374419e-8     # W/m^2/K^4
 solar_radius = 696340000        # m
 solar_lum = 3.83e+26             # W
 
+def trapezoid_rule(x1, x2, y1, y2):
+    ''' Calculates the area of the trapezoid made by two points.
+    Parameters
+    ----------
+    x1, x2 : float
+        The left and right x positions
+    y1, y2 : float
+        The left and right y positions
+    Returns
+    -------
+    float
+        The area of the trapezoid in units of x*y
+    '''
+    return 0.5 * abs(x2 - x1) * (y1 + y2)
+
+def filter_bandpasses(filter):
+    ''' WIP
+    - Filter bandpasses (J,H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
+    Parameters
+    ----------
+    filter : str
+        One of {'J', 'H', 'K', 'L', 'M'} corresponding to the filter bandpass wanted. 
+    Returns
+    -------
+    lambdas : j/np.array (1 x N)
+        The wavelength samples of the filter band
+    transmittances : j/np.array (1 x N)
+        The transmittance of the filter at each of the wavelength samples
+    '''
+    lambdas, transmittances = jnp.zeros(10), jnp.zeros(10)
+    return lambdas, transmittances
+
 
 def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400, resolution=600, root_dir=''):
     ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
@@ -46,21 +78,24 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
         save_dir = root_dir + '/'
     else:
         save_dir = root_dir
-    particles, weights = gm.dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
+    
+    stardatacopy = stardata.copy()
+    stardatacopy['sigma'] = 0
+    particles, weights = gm.dust_plume_custom(stardatacopy, shells, n_t=n_t, n_points=n_points)
 
     # make an image of what we expect from the stock geometric model so we can compare with the radiative transfer output
     fig, ax = plt.subplots()
     xbound, ybound = jnp.max(jnp.abs(particles[0, :])), jnp.max(jnp.abs(particles[1, :]))
     bound = jnp.max(jnp.array([xbound, ybound])) * (1. + 2. / resolution)
     pixel_bins = jnp.linspace(-bound, bound, resolution+1)
-    X, Y, H = gm.smooth_histogram2d_w_bins(particles, weights, stardata, pixel_bins, pixel_bins)
+    X, Y, H = gm.smooth_histogram2d_w_bins(particles, weights, stardatacopy, pixel_bins, pixel_bins)
     ax.pcolormesh(-X, Y, H, cmap='hot', rasterized=True)
     ax.set(aspect='equal', ylabel='Relative Dec (")', xlabel='Relative RA (")')
     ax.invert_xaxis()
     fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300, bbox_inches='tight')
 
 
-    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardata['distance'] * 3.086e13) # convert from angular coords back to physical coords
+    particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardatacopy['distance'] * 3.086e13) # convert from angular coords back to physical coords
     particles /= gm.AU2km  # MCFOST needs distances in au
 
     # get rid of any points that have no mass
@@ -192,9 +227,10 @@ def generate_para(stardata, paraname, density_file, distance=2400, photons=1e7, 
     parafile.write("#Star properties\n"+\
                     f" {num_stars} Number of stars\n")
     for star in range(num_stars):
+        pos = 0 if star == 0 else 1
         star_radius = jnp.sqrt(10**stardata[f'star{star+1}lum'] * solar_lum / (4 * jnp.pi * stardata[f'star{star+1}temp']**4 * stef_boltz))     # use the stefan boltzmann law to calculate stellar radius
         star_radius /= solar_radius     # convert from m to R_sun (needed for MCFOST)
-        parafile.write(f" {stardata[f'star{star+1}temp']:.1f}	{star_radius:.1f}	15.0	0.{star}	0.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
+        parafile.write(f" {stardata[f'star{star+1}temp']:.1f}	{star_radius:.1f}	15.0	{pos * (-1)**star}.0	{pos * (-1)**star}.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
                     " lte4000-3.5.NextGen.fits.gz\n"+\
                     " 0.0	2.2  fUV, slope_fUV\n")
 
@@ -205,6 +241,11 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
                    email='ryan.white1@hdr.mq.edu.au', mcfost_setup='~/setup_mcfost'):
     ''' Generates a slurm script to run a *single* radiative transfer calculation on a xenomorph-generated spiral. 
     The script will generate the temperature profile of the (currently default-only) dust, and then image it and the specified wavelength.
+
+    Todo:
+     - Generate multiple runs at different wavelengths covering various bandpasses, to be used in interpolation later. Can do this
+        by setting the wavelength as a string for a given filter.
+            - Filter bandpasses (J,H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
 
     Parameters
     ----------
