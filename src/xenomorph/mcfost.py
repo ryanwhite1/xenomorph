@@ -23,6 +23,8 @@ M_band_samples = {4.4484 : 0.010919, 4.6 : 0.81075, 4.708 : 0.840764, 4.8828 : 0
 
 bandpasses = {'H': H_band_samples, 'K': K_band_samples, 'L': L_band_samples, 'M': M_band_samples}
 
+# band 0-mag fluxes here? https://about.ifa.hawaii.edu/ukirt/calibration-and-standards/astronomical-utilities/zero-mag-fluxes-and-conversions/
+
 def trapezoid_rule(x1, x2, y1, y2):
     ''' Calculates the area of the trapezoid made by two points.
     Parameters
@@ -236,7 +238,7 @@ def generate_para(stardata, paraname, density_file, distance=2400, photons=1e7, 
         pos = 0 if star == 0 else 1
         star_radius = jnp.sqrt(10**stardata[f'star{star+1}lum'] * solar_lum / (4 * jnp.pi * stardata[f'star{star+1}temp']**4 * stef_boltz))     # use the stefan boltzmann law to calculate stellar radius
         star_radius /= solar_radius     # convert from m to R_sun (needed for MCFOST)
-        parafile.write(f" {stardata[f'star{star+1}temp']:.1f}	{star_radius:.1f}	15.0	{pos * (-1)**star}.0	{pos * (-1)**star}.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
+        parafile.write(f" {stardata[f'star{star+1}temp']:.1f}	{star_radius:.1f}	15.0	{pos*(-1)**star}.0	{pos*(-1)**star}.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
                     " lte4000-3.5.NextGen.fits.gz\n"+\
                     " 0.0	2.2  fUV, slope_fUV\n")
 
@@ -249,17 +251,16 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     The script will generate the temperature profile of the (currently default-only) dust, and then image it and the specified wavelength.
 
     Todo:
-     - Generate multiple runs at different wavelengths covering various bandpasses, to be used in interpolation later. Can do this
-        by setting the wavelength as a string for a given filter.
-            - Filter bandpasses (H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
-            - I am omitting the J band as it doesn't represent appreciable dust formation
+      - ?
 
     Parameters
     ----------
     slurmname : str
         The name that you'd like to give to this slurm script. A '.q' is automatically appended to the end of this input.
-    wavelength : int or float
+    wavelength : int or float, or str or dict
         The wavelength (in microns) that you'd like to generate the image for.
+        If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
+        If wavelength is a dict, it will be as for the str case, but for user-defined wavelengths.
     para_file : str
         The name of the MCFOST parameter file for the system.
     density_file : str
@@ -306,9 +307,10 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
                          '\n', 'echo "Starting mcfost..."\n', '\n']
 
     mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb\n']
-    if type(wavelength) == str:
-        for lambda_sample in bandpasses[wavelength].keys():
-            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {lambda_sample}\n')
+    if type(wavelength) == str or type(wavelength) == dict:
+        wavelengths = list(bandpasses[wavelength].keys()) if type(wavelength) == str else list(wavelength.keys())
+        for sample_lambda in wavelengths:
+            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {sample_lambda}\n')
     else:
         mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}\n')
 
