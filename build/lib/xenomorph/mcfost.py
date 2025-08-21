@@ -410,3 +410,6 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
         generate_para(stardata_sample, 'system_para', 'density_file.fits', photons=photons, T_photons=T_photons, resolution=resolution, 
                         gas_2_dust=gas_2_dust, root_dir=phase_dir)
     
+        # now finally generate all of the necessary slurm scripts
+        generate_slurm(f'sample_{i:04d}', wavelength, 'system_para.q', 'density_file.fits', cpus=cpus, run_hours=run_hours, memory=memory, root_dir=phase_dir, 
+                        job_name=f"{job_name}_{i}", email=email, mcfost_setup=mcfost_setup)

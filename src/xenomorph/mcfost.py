@@ -101,7 +101,8 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     ax.pcolormesh(-X, Y, H, cmap='hot', rasterized=True)
     ax.set(aspect='equal', ylabel='Relative Dec (")', xlabel='Relative RA (")')
     ax.invert_xaxis()
-    
+    fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300, bbox_inches='tight')
+    plt.close('all')
 
 
     particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardatacopy['distance'] * 3.086e13) # convert from angular coords back to physical coords
@@ -123,7 +124,7 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     hdul = fits.HDUList([fits_masses, fits_positions])
     hdul.writeto(save_dir + filename, overwrite=True)
 
-    fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300, bbox_inches='tight')
+    
 
 
 
@@ -410,3 +411,6 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
         generate_para(stardata_sample, 'system_para', 'density_file.fits', photons=photons, T_photons=T_photons, resolution=resolution, 
                         gas_2_dust=gas_2_dust, root_dir=phase_dir)
     
+        # now finally generate all of the necessary slurm scripts
+        generate_slurm(f'sample_{i:04d}', wavelength, 'system_para.q', 'density_file.fits', cpus=cpus, run_hours=run_hours, memory=memory, root_dir=phase_dir, 
+                        job_name=f"{job_name}_{i}", email=email, mcfost_setup=mcfost_setup)
