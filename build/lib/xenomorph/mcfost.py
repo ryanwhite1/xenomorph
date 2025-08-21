@@ -6,6 +6,7 @@ import numpy as np
 import io
 from astropy.io import fits
 import matplotlib.pyplot as plt
+import os
 
 import src.xenomorph.geometry as gm
 import src.xenomorph.systems as wrb
@@ -22,6 +23,8 @@ L_band_samples = {3.1309 : 0.01, 3.23 : 0.921975, 3.7037 : 0.925085, 3.751 : 0.9
 M_band_samples = {4.4484 : 0.010919, 4.6 : 0.81075, 4.708 : 0.840764, 4.8828 : 0.90181, 5.0454 : 0.79153, 5.11247 : 0.86137, 5.27426 : 0.010345}
 
 bandpasses = {'H': H_band_samples, 'K': K_band_samples, 'L': L_band_samples, 'M': M_band_samples}
+
+# band 0-mag fluxes here? https://about.ifa.hawaii.edu/ukirt/calibration-and-standards/astronomical-utilities/zero-mag-fluxes-and-conversions/
 
 def trapezoid_rule(x1, x2, y1, y2):
     ''' Calculates the area of the trapezoid made by two points.
@@ -40,20 +43,17 @@ def trapezoid_rule(x1, x2, y1, y2):
 
 def filter_bandpasses(filter):
     ''' WIP
-    - Filter bandpasses (J,H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
+    - Filter bandpasses (H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
     Parameters
     ----------
     filter : str
-        One of {'J', 'H', 'K', 'L', 'M'} corresponding to the filter bandpass wanted. 
+        One of {'H', 'K', 'L', 'M'} corresponding to the filter bandpass wanted. The 'J' band is omitted as it usually can't pick up dust formation. 
     Returns
     -------
-    lambdas : j/np.array (1 x N)
-        The wavelength samples of the filter band
-    transmittances : j/np.array (1 x N)
-        The transmittance of the filter at each of the wavelength samples
+    bandpass : dict
+        A dictionary where the keys are the wavelength samples and the vals are the transmittances at that wavelength
     '''
-    lambdas, transmittances = jnp.zeros(10), jnp.zeros(10)
-    return lambdas, transmittances
+    return bandpasses[filter]
 
 
 def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400, resolution=600, root_dir=''):
@@ -89,7 +89,7 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
         save_dir = root_dir
     
     stardatacopy = stardata.copy()
-    stardatacopy['sigma'] = 0
+    stardatacopy['sigma'] = 0.5
     particles, weights = gm.dust_plume_custom(stardatacopy, shells, n_t=n_t, n_points=n_points)
 
     # make an image of what we expect from the stock geometric model so we can compare with the radiative transfer output
@@ -101,7 +101,7 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     ax.pcolormesh(-X, Y, H, cmap='hot', rasterized=True)
     ax.set(aspect='equal', ylabel='Relative Dec (")', xlabel='Relative RA (")')
     ax.invert_xaxis()
-    fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300, bbox_inches='tight')
+    
 
 
     particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardatacopy['distance'] * 3.086e13) # convert from angular coords back to physical coords
@@ -122,6 +122,8 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     fits_positions = fits.ImageHDU(particles.T)     # transposed to get the orientation right (although it doesnt affect the calc at all)
     hdul = fits.HDUList([fits_masses, fits_positions])
     hdul.writeto(save_dir + filename, overwrite=True)
+
+    fig.savefig(save_dir + f'{filename[:-5]}_geometric_model.png', dpi=300, bbox_inches='tight')
 
 
 
@@ -239,30 +241,29 @@ def generate_para(stardata, paraname, density_file, distance=2400, photons=1e7, 
         pos = 0 if star == 0 else 1
         star_radius = jnp.sqrt(10**stardata[f'star{star+1}lum'] * solar_lum / (4 * jnp.pi * stardata[f'star{star+1}temp']**4 * stef_boltz))     # use the stefan boltzmann law to calculate stellar radius
         star_radius /= solar_radius     # convert from m to R_sun (needed for MCFOST)
-        parafile.write(f" {stardata[f'star{star+1}temp']:.1f}	{star_radius:.1f}	15.0	{pos * (-1)**star}.0	{pos * (-1)**star}.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
+        parafile.write(f" {stardata[f'star{star+1}temp']:.1f}	{star_radius:.1f}	15.0	{pos*(-1)**star}.0	{pos*(-1)**star}.0	0.0  T Temp, radius (solar radius),M (solar mass),x,y,z (AU), automatic spectrum?\n"+\
                     " lte4000-3.5.NextGen.fits.gz\n"+\
                     " 0.0	2.2  fUV, slope_fUV\n")
 
     parafile.close()
 
 
-def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_hours=10, memory=4, root_dir='', job_name="mcfost-transfer",
+def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_hours=4, memory=4, root_dir='', job_name="mcfost-transfer",
                    email='ryan.white1@hdr.mq.edu.au', mcfost_setup='~/setup_mcfost'):
     ''' Generates a slurm script to run a *single* radiative transfer calculation on a xenomorph-generated spiral. 
     The script will generate the temperature profile of the (currently default-only) dust, and then image it and the specified wavelength.
 
     Todo:
-     - Generate multiple runs at different wavelengths covering various bandpasses, to be used in interpolation later. Can do this
-        by setting the wavelength as a string for a given filter.
-            - Filter bandpasses (H,K,L,M) are available at https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
-            - I am omitting the J band as it doesn't represent appreciable dust formation
+      - ?
 
     Parameters
     ----------
     slurmname : str
         The name that you'd like to give to this slurm script. A '.q' is automatically appended to the end of this input.
-    wavelength : int or float
+    wavelength : int or float, or str or dict
         The wavelength (in microns) that you'd like to generate the image for.
+        If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
+        If wavelength is a dict, it will be as for the str case, but for user-defined wavelengths.
     para_file : str
         The name of the MCFOST parameter file for the system.
     density_file : str
@@ -309,9 +310,10 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
                          '\n', 'echo "Starting mcfost..."\n', '\n']
 
     mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb\n']
-    if type(wavelength) == str:
-        for lambda_sample in bandpasses[wavelength].keys():
-            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {lambda_sample}\n')
+    if type(wavelength) == str or type(wavelength) == dict:
+        wavelengths = list(bandpasses[wavelength].keys()) if type(wavelength) == str else list(wavelength.keys())
+        for sample_lambda in wavelengths:
+            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {sample_lambda}\n')
     else:
         mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}\n')
 
@@ -325,3 +327,83 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     slurmfile.close()
 
 
+def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=1e7, T_photons=1e7, gas_2_dust=100, 
+                        resolution=30, root_dir='', cpus=8, run_hours=2, memory=4, job_name="mcfost-lightcurve", email='ryan.white1@hdr.mq.edu.au', 
+                        mcfost_setup='~/setup_mcfost'):
+    '''
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    shell_mass : float
+        The mass (in units of Solar masses) of *each* dust shell. This assumes MCFOST is using a 1:100 dust:gas mass ratio, so the actual mass will be
+        multiplied by 100. That is, the user-entered mass here is just for the dust.
+    wavelength : int or float, or str or dict
+        The wavelength (in microns) that you'd like to generate the image for.
+        If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
+        If wavelength is a dict, it will be as for the str case, but for user-defined wavelengths.
+    method : str or j/np.array
+        This parameter dictates how the time samples across orbital phase are distributed. If method=='equal', there will be n_samples equally spaced samples across 
+        orbital phase 0 to 1 to construct the light curve. If method=='periastron_dense', there will be proportionally more samples around periastron (when there 
+        is active dust production). If method is a j/np array, the values of the one-dimensional array will be used as the phase samples.
+    n_samples : int
+        The number of orbital phase samples with which to construct the light curve. This is only relevant if the `method` parameter is a string. 
+    shells : int
+        The number of shells to generate.
+    n_t : int
+        The number of rings to generate in each shell.
+    n_points : int
+        The number of points to generate in each ring.
+    photons : int
+        The number of photons to use in the imaging computation.
+    T_photons : int
+        The number of photons to use in the T computation
+    gas_2_dust : float 
+        The mass of gas relative to the dust in each particle
+    resolution : int
+        The number of pixels (per side) for the geometric comparison image.
+    root_dir : str
+        The directory where you'd like the output of the job to be.
+    cpus : int
+        The number of CPUs you'd like to allocate to running this MCFOST job. A power of 2 is usually good.
+    run_hours : int
+        How many (wall-time) hours you'd like to set the job to run before the scheduling system cancels it.
+    memory : float or int
+        The amount of memory (in GB) to allocate to the job. 
+        In my experience they typically use of order a few hundred MB, so setting 1-4GB is usually safe.
+    job_name : str
+        A name for the job (only visible on the HPC queue system).
+    email : str
+        The email of the user, should they want email updates on how the job is doing. Mine by default :)
+    mcfost_setup : str
+        The location (and name) of the mcfost_setup file. This file is meant to be read each time an MCFOST job is run on a HPC. 
+        A typical ~/setup_mcfost file will look like:
+            export PATH=/<path to mcfost>/mcfost/bin:${PATH}
+            export MCFOST_UTILS=/<path to mcfost>/mcfost/utils 
+    '''
+    if type(method) == str:
+        n_samples = n_samples
+        if method == 'equal':
+            phase_samples = jnp.arange(0, 1, 1. / n_samples)
+        else:   # must be 'periastron_dense' in this case
+            # we should overhaul periastron_dense to take into account the dust turn on/off to well sample around this
+            phase_samples_first_half = jnp.logspace(-3, jnp.log10(0.5), n_samples//2) 
+            phase_samples_second_half = 1 - jnp.logspace(-3, jnp.log10(0.5), n_samples - n_samples//2 + 1)[:-1][::-1]
+            phase_samples = jnp.append(phase_samples_first_half, phase_samples_second_half)
+    else:
+        phase_samples = method.copy()
+        n_samples = len(method)
+    
+    if root_dir != '':
+        write_dir = f'{root_dir}/'
+    else:
+        write_dir = ''
+    
+    # start by creating all of the density files
+    # file_dir = os.path.dirname(os.path.realpath(__file__))
+    for i, phase in enumerate(phase_samples):
+        phase_dir = write_dir + f'sample_{i:04d}'
+        os.makedirs(phase_dir)
+        stardata_sample = stardata.copy()
+        stardata_sample['phase'] = phase
+        mcfost_points(stardata_sample, shells, shell_mass, 'density_file.fits', n_t=n_t, n_points=n_points, resolution=resolution, root_dir=phase_dir)
