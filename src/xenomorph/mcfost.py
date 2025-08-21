@@ -127,7 +127,7 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
 
 
 
-def generate_para(stardata, paraname, density_file, distance=2400, photons=1e7, T_photons=1e7, resolution=600, gas_2_dust=100, root_dir=''):
+def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, resolution=600, gas_2_dust=100, root_dir=''):
     '''WIP -- Generates a .para file to be used in the MCFOST run. 
     Note:
      - The dust mass *must* be set at run time (through the density_file provided)
