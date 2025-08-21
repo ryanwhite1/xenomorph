@@ -397,10 +397,16 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
     else:
         write_dir = ''
     
-    # start by creating all of the density files within sampled phase directories
+    
     for i, phase in enumerate(phase_samples):
         phase_dir = write_dir + f'sample_{i:04d}'
         os.makedirs(phase_dir)
         stardata_sample = stardata.copy()
         stardata_sample['phase'] = phase
+        # start by creating all of the density files within sampled phase directories
         mcfost_points(stardata_sample, shells, shell_mass, 'density_file.fits', n_t=n_t, n_points=n_points, resolution=resolution, root_dir=phase_dir)
+
+        # now create the para files (doing them seperately for now in case we want to change grain size params later on)
+        generate_para(stardata_sample, 'system_para', 'density_file.fits', photons=photons, T_photons=T_photons, resolution=resolution, 
+                        gas_2_dust=gas_2_dust, root_dir=phase_dir)
+    
