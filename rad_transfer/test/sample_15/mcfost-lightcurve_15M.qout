@@ -1,0 +1,729 @@
+HOSTNAME = dave50
+HOSTTYPE = x86_64
+Time is Thu Aug 21 13:07:19 AEST 2025
+Directory is /fred/oz045/rwhite/xenomorph/rad_transfer/test/sample_15
+Starting mcfost...
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Thermal equilibrium calculation
+ Temperature calculation under LTE approximation
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:07:19 AEST 2025
+ Creating directory ././data_th
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   11.71841     MB for temporary neighbours list
+   0% |                                                  |    1% |=                                                 |    2% |=                                                 |    3% |==                                                |    4% |==                                                |    5% |==                                                |    6% |===                                               |    7% |===                                               |    8% |====                                              |    9% |====                                              |   10% |=====                                             |   11% |=====                                             |   12% |======                                            |   13% |======                                            |   14% |=======                                           |   15% |========                                          |   17% |========                                          |   18% |=========                                         |   19% |=========                                         |   20% |==========                                        |   21% |==========                                        |   22% |===========                                       |   23% |===========                                       |   24% |============                                      |   25% |============                                      |   26% |=============                                     |   27% |=============                                     |   28% |==============                                    |   28% |==============                                    |   29% |==============                                    |   30% |===============                                   |   31% |===============                                   |   32% |================                                  |   33% |================                                  |   34% |=================                                 |   35% |=================                                 |   36% |==================                                |   37% |==================                                |   38% |===================                               |   39% |===================                               |   40% |====================                              |   41% |====================                              |   42% |=====================                             |   43% |=====================                             |   44% |======================                            |   45% |======================                            |   46% |=======================                           |   47% |=======================                           |   48% |========================                          |   49% |========================                          |   50% |=========================                         |   51% |=========================                         |   52% |==========================                        |   53% |==========================                        |   54% |===========================                       |   55% |===========================                       |   56% |============================                      |   57% |============================                      |   58% |=============================                     |   59% |=============================                     |   60% |==============================                    |   61% |==============================                    |   62% |===============================                   |   63% |===============================                   |   64% |================================                  |   65% |================================                  |   66% |=================================                 |   67% |=================================                 |   68% |==================================                |   69% |==================================                |   70% |===================================               |   71% |===================================               |   72% |====================================              |   73% |====================================              |   74% |=====================================             |   75% |=====================================             |   76% |======================================            |   77% |======================================            |   78% |=======================================           |   79% |=======================================           |   80% |========================================          |   81% |========================================          |   82% |=========================================         |   83% |=========================================         |   84% |==========================================        |   85% |==========================================        |   86% |===========================================       |   87% |===========================================       |   88% |============================================      |   89% |============================================      |   90% |=============================================     |   91% |=============================================     |   92% |==============================================    |   93% |==============================================    |   94% |===============================================   |   95% |===============================================   |   96% |================================================  |   97% |================================================  |   98% |================================================= |  100% |==================================================| 
+ Trying to allocate   5.163506     MB for neighbours list
+ Freeing temporary neighbours list
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time = 26.85s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Computing dust properties ... Done
+ lambda =  0.854080274425481     
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ No dark zone
+ Initializing thermal properties ... Done
+ Initialization complete in 27.16s
+ Computing temperature structure ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Max. temperature =    383.4768    
+ Temperature calculation complete in   0h  3m  7s
+ Source fct time  0.0000000E+00 s
+ RT time          0.0000000E+00 s
+ Processing complete in   0h  3m  7s
+ CPU time used            0h 24m  6s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   4.448400      microns
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:10:27 AEST 2025
+ Creating directory ././data_4.4484
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   5.163506     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.06s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ 
+ Dust properties in cell #           1
+ g               0.3750224    
+ albedo          0.5141708    
+ Reading temperature file : ././data_th/Temperature.fits.gz
+ frac. energy emitted by star(s) :   0.9977677    
+ Relative fraction of energy emitted by each star:
+ Star #           1 -->  1.8180424E-02
+ Star #           2 -->  9.7504044E-03
+ Star #           3 -->  0.9720692    
+ Initialization complete in  0.29s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h  5m 39s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Optical depth from star # 2 is  0.00000E+00
+ Optical depth from star # 3 is  0.00000E+00
+ Done
+ Time =   0h  5m 41s
+ Source fct time  2.3000001E-03 s
+ RT time           1.574400     s
+ Processing complete in   0h  5m 41s
+ CPU time used            0h 43m 59s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   4.600000      microns
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:16:08 AEST 2025
+ Creating directory ././data_4.6
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   5.163506     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.06s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ 
+ Dust properties in cell #           1
+ g               0.3697198    
+ albedo          0.5068083    
+ Reading temperature file : ././data_th/Temperature.fits.gz
+ frac. energy emitted by star(s) :   0.9962815    
+ Relative fraction of energy emitted by each star:
+ Star #           1 -->  1.8159738E-02
+ Star #           2 -->  9.7379880E-03
+ Star #           3 -->  0.9721023    
+ Initialization complete in  0.24s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h  5m 24s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Optical depth from star # 2 is  0.00000E+00
+ Optical depth from star # 3 is  0.00000E+00
+ Done
+ Time =   0h  5m 25s
+ Source fct time  1.7000000E-03 s
+ RT time           1.381300     s
+ Processing complete in   0h  5m 25s
+ CPU time used            0h 42m  4s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   4.708000      microns
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:21:34 AEST 2025
+ Creating directory ././data_4.708
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   5.163506     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.05s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ 
+ Dust properties in cell #           1
+ g               0.3648182    
+ albedo          0.5009581    
+ Reading temperature file : ././data_th/Temperature.fits.gz
+ frac. energy emitted by star(s) :   0.9947820    
+ Relative fraction of energy emitted by each star:
+ Star #           1 -->  1.8145842E-02
+ Star #           2 -->  9.7296471E-03
+ Star #           3 -->  0.9721245    
+ Initialization complete in  0.21s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h  5m 27s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Optical depth from star # 2 is  0.00000E+00
+ Optical depth from star # 3 is  0.00000E+00
+ Done
+ Time =   0h  5m 29s
+ Source fct time  2.0999999E-03 s
+ RT time           1.563000     s
+ Processing complete in   0h  5m 29s
+ CPU time used            0h 42m  0s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   4.882800      microns
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:27:03 AEST 2025
+ Creating directory ././data_4.8828
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   5.163506     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.06s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ 
+ Dust properties in cell #           1
+ g               0.3542030    
+ albedo          0.4903596    
+ Reading temperature file : ././data_th/Temperature.fits.gz
+ frac. energy emitted by star(s) :   0.9913155    
+ Relative fraction of energy emitted by each star:
+ Star #           1 -->  1.8124701E-02
+ Star #           2 -->  9.7169532E-03
+ Star #           3 -->  0.9721583    
+ Initialization complete in  0.28s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h  5m 39s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Optical depth from star # 2 is  0.00000E+00
+ Optical depth from star # 3 is  0.00000E+00
+ Done
+ Time =   0h  5m 40s
+ Source fct time  2.0000001E-03 s
+ RT time           1.451000     s
+ Processing complete in   0h  5m 40s
+ CPU time used            0h 44m 20s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   5.045400      microns
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:32:44 AEST 2025
+ Creating directory ././data_5.0454
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   5.163506     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.05s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ 
+ Dust properties in cell #           1
+ g               0.3411384    
+ albedo          0.4795184    
+ Reading temperature file : ././data_th/Temperature.fits.gz
+ frac. energy emitted by star(s) :   0.9865844    
+ Relative fraction of energy emitted by each star:
+ Star #           1 -->  1.8106362E-02
+ Star #           2 -->  9.7059486E-03
+ Star #           3 -->  0.9721876    
+ Initialization complete in  0.30s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h  5m 49s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Optical depth from star # 2 is  0.00000E+00
+ Optical depth from star # 3 is  0.00000E+00
+ Done
+ Time =   0h  5m 50s
+ Source fct time  2.4999999E-03 s
+ RT time           1.377100     s
+ Processing complete in   0h  5m 50s
+ CPU time used            0h 44m 25s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   5.112470      microns
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:38:35 AEST 2025
+ Creating directory ././data_5.11247
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   5.163506     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.05s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ 
+ Dust properties in cell #           1
+ g               0.3349648    
+ albedo          0.4749374    
+ Reading temperature file : ././data_th/Temperature.fits.gz
+ frac. energy emitted by star(s) :   0.9841109    
+ Relative fraction of energy emitted by each star:
+ Star #           1 -->  1.8099148E-02
+ Star #           2 -->  9.7016105E-03
+ Star #           3 -->  0.9721993    
+ Initialization complete in  0.46s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h  5m 38s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Optical depth from star # 2 is  0.00000E+00
+ Optical depth from star # 3 is  0.00000E+00
+ Done
+ Time =   0h  5m 40s
+ Source fct time  2.4000001E-03 s
+ RT time           1.448900     s
+ Processing complete in   0h  5m 40s
+ CPU time used            0h 43m 44s
+ You are running MCFOST 4.1.08
+ Git SHA = a0892a289d5e1488a1d8fa1cebaef06220aee4bc
+ Multiple illuminating stars! Cancelling all image symmetries
+ Checking densityfile.fits
+ Found 1D density structure, using a Voronoi mesh
+ Input file read successfully
+ Scattered light + thermal emission map calculation
+ Calculating image at wavelength =   5.274260      microns
+ Parallelized code on   8 processors
+  
+Thu Aug 21 13:44:15 AEST 2025
+ Creating directory ././data_5.27426
+ Using ray-tracing method 1
+ Reading /fred/oz045/rwhite/mcfost/utils/Dust/ac_opct.dat
+ Number of regions detected: 1
+ zone 1 --> region= 1 : R=100.00 to 300.00 AU
+ Reading Voronoi fits file: densityfile.fits
+ Done
+  
+ # Farthest particules :
+ x =  -31901.9240559458        31823.1857454588     
+ y =  -31523.5940493859        30597.9100137000     
+ z =  -32531.2450755028        30467.1578207649     
+ Found      102398  hydro sites.
+ Selecting spatial range which contains
+   100.0000     % of particles in each dimension
+ # Model limits :
+ x =  -31901.9238281250        31823.1855468750     
+ y =  -31523.5937500000        30597.9101562500     
+ z =  -32531.2441406250        30467.1582031250     
+ Using            8  cores for Voronoi tesselation
+ Finding            6 walls
+           1 particles have been deleted before tesselation
+ Performing Voronoi tesselation on       102397 SPH particles
+ mcfost will require ~   4.296749     MB of temporary memory for the tesselation
+ Trying to allocate   5.163506     MB for neighbours list
+ Reading previous Voronoi tesselation
+ Tesselation done
+ Mean number of stellar neighbours = 14067
+ Building the kd-trees for the model walls
+ Tesselation Time =  0.05s
+ Found      102397 cells
+ Neighbours list size =     1353582
+ Average number of neighbours =   13.21896    
+ Voronoi volume =   55272346356981.3     
+ Using n_cells =      102397
+ Using gas-to-dust ratio in mcfost parameter file
+ Total  gas mass in model :  9.9997874E-04  Msun
+ Total dust mass in model :  9.9997878E-06  Msun
+ Reference cell is #           1
+ Using      102397 cells
+ Using a Voronoi mesh
+ Using scattering method 2
+ Trying to find appropriate stellar spectra ...
+ Star #           1  --> BB at T=   70000.00     K
+ Star #           2  --> BB at T=   85000.00     K
+ Star #           3  --> BB at T=   28000.00     K
+ Done
+ Integ tau dans plan eq. =   0.0000000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ Integ tau (i =75.0 deg)   =  0.00000E+00
+  Column density (g/cm^2)   =   0.0000000E+00
+ 
+ Dust properties in cell #           1
+ g               0.3186679    
+ albedo          0.4638407    
+ Reading temperature file : ././data_th/Temperature.fits.gz
+ frac. energy emitted by star(s) :   0.9766386    
+ Relative fraction of energy emitted by each star:
+ Star #           1 -->  1.8082507E-02
+ Star #           2 -->  9.6916277E-03
+ Star #           3 -->  0.9722259    
+ Initialization complete in  0.19s
+ Computing MC radiation field ...
+   0% |                                                  |   2% |=                                                 |   4% |==                                                |   6% |===                                               |   8% |====                                              |  10% |=====                                             |  12% |======                                            |  14% |=======                                           |  16% |========                                          |  18% |=========                                         |  20% |==========                                        |  22% |===========                                       |  24% |============                                      |  26% |=============                                     |  28% |==============                                    |  30% |===============                                   |  32% |================                                  |  34% |=================                                 |  36% |==================                                |  38% |===================                               |  40% |====================                              |  42% |=====================                             |  44% |======================                            |  46% |=======================                           |  48% |========================                          |  50% |=========================                         |  52% |==========================                        |  54% |===========================                       |  56% |============================                      |  58% |=============================                     |  60% |==============================                    |  62% |===============================                   |  64% |================================                  |  66% |=================================                 |  68% |==================================                |  70% |===================================               |  72% |====================================              |  74% |=====================================             |  76% |======================================            |  78% |=======================================           |  80% |========================================          |  82% |=========================================         |  84% |==========================================        |  86% |===========================================       |  88% |============================================      |  90% |=============================================     |  92% |==============================================    |  94% |===============================================   |  96% |================================================  |  98% |================================================= | 100% |==================================================|
+ Time =   0h  5m 43s
+ Ray-tracing ...
+ i=  0.0000000E+00 az=  0.0000000E+00
+ Vector to observer =  0.0000000E+00 -9.9999997E-21   1.000000    
+ x-image =              1.000000      0.0000000E+00  0.0000000E+00
+ y-image =             0.0000000E+00   1.000000      9.9999997E-21
+ Optical depth from star # 1 is  0.00000E+00
+ Optical depth from star # 2 is  0.00000E+00
+ Optical depth from star # 3 is  0.00000E+00
+ Done
+ Time =   0h  5m 44s
+ Source fct time  1.3000000E-03 s
+ RT time           1.334800     s
+ Processing complete in   0h  5m 44s
+ CPU time used            0h 43m 50s
+
++------------------ Job Report: 3864208 (COMPLETED) -------------------+
+| Memory (RAM)  [#                   ]  9.1% (370.7 MB peak / 4 GB)    |
+| CPU           [################### ] 96.0% average                   |
+| Time          [------->            ] 35.7% (0-00:42:47 / 0-02:00:00) |
+|                                                                      |
+| Lustre Filesystem:                                                   |
+|   Path    Total Read    Total Write      Total IOPS                  |
+|   ------  ------------  -------------  ------------                  |
+|   /apps   504 KB        0 B                     90                   |
+|   /fred   71.4 MB       56.5 MB                357                   |
+|   /home   4 KB          0 B                      3                   |
+|                                                                      |
+| Warnings:                                                            |
+|   - Too much memory requested                                        |
+|   - Too much time requested                                          |
++----------------------------------------------------------------------+

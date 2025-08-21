@@ -326,7 +326,7 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     slurmfile.close()
 
 
-def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=1e7, T_photons=1e7, gas_2_dust=100, 
+def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=2e7, T_photons=1e7, gas_2_dust=100, 
                         resolution=30, root_dir='', cpus=8, run_hours=2, memory=4, job_name="mcfost-lightcurve", email='ryan.white1@hdr.mq.edu.au', 
                         mcfost_setup='~/setup_mcfost'):
     '''
@@ -400,17 +400,23 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
     
     
     for i, phase in enumerate(phase_samples):
-        phase_dir = write_dir + f'sample_{i:04d}'
+        phase_dir = write_dir + f'sample_{i}'
         os.makedirs(phase_dir)
         stardata_sample = stardata.copy()
         stardata_sample['phase'] = phase
         # start by creating all of the density files within sampled phase directories
-        mcfost_points(stardata_sample, shells, shell_mass, 'density_file.fits', n_t=n_t, n_points=n_points, resolution=resolution, root_dir=phase_dir)
+        mcfost_points(stardata_sample, shells, shell_mass, 'densityfile.fits', n_t=n_t, n_points=n_points, resolution=resolution, root_dir=phase_dir)
 
         # now create the para files (doing them seperately for now in case we want to change grain size params later on)
-        generate_para(stardata_sample, 'system_para', 'density_file.fits', photons=photons, T_photons=T_photons, resolution=resolution, 
+        generate_para(stardata_sample, 'systempara', 'densityfile.fits', photons=photons, T_photons=T_photons, resolution=resolution, 
                         gas_2_dust=gas_2_dust, root_dir=phase_dir)
     
         # now finally generate all of the necessary slurm scripts
-        generate_slurm(f'sample_{i:04d}', wavelength, 'system_para.q', 'density_file.fits', cpus=cpus, run_hours=run_hours, memory=memory, root_dir=phase_dir, 
+        generate_slurm(f'sample_{i}', wavelength, 'systempara.para', 'densityfile.fits', cpus=cpus, run_hours=run_hours, memory=memory, root_dir=phase_dir, 
                         job_name=f"{job_name}_{i}", email=email, mcfost_setup=mcfost_setup)
+    
+    # now write a bash script to queue all of the ozstar jobs
+    lines = [f"for (( num=0; num<{n_samples}; num++))\n", "do\n", f" cd sample_$num\n", f" sbatch sample_$num.q\n", f" cd ..\n", "done\n"]
+    bashscript = io.open(f'{write_dir}generate_lightcurve.sh', 'w', newline='\n')
+    bashscript.writelines(lines)
+    bashscript.close()
