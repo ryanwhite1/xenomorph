@@ -7,6 +7,8 @@ import io
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import os
+import gzip
+import shutil
 
 import src.xenomorph.geometry as gm
 import src.xenomorph.systems as wrb
@@ -420,3 +422,61 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
     bashscript = io.open(f'{write_dir}generate_lightcurve.sh', 'w', newline='\n')
     bashscript.writelines(lines)
     bashscript.close()
+
+def lightcurve_plot(folder, wavelength):
+    '''
+    Some help gotten from https://stackoverflow.com/questions/973473/getting-a-list-of-all-subdirectories-in-the-current-directory
+    Todo:
+        - account for custom phase samples
+    '''
+    subdirectories = [f.name for f in os.scandir(folder) if f.is_dir()]
+    n_samples = len(subdirectories)
+    sample_nums = [int(subdirectory[7:]) for subdirectory in subdirectories]
+
+    phases = np.arange(0, 1, 1 / n_samples)
+    fluxes = np.zeros(n_samples)
+
+    for i in range(n_samples):
+        current_dir = folder + f'/sample_{i}/'
+        if type(wavelength) == str or type(wavelength) == dict:
+            if type(wavelength) == str:
+                wavelengths = list(bandpasses[wavelength].keys())
+            elif type(wavelength) == dict:
+                wavelengths = list(wavelength.keys())
+
+            running_flux = 0
+            running_transmittance = 0
+
+            for j, wavelength in enumerate(wavelengths):
+                with gzip.open(current_dir + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
+                    with open(current_dir + f'data_{wavelength}/RT.fits', 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+            
+                hdul = fits.open(current_dir + f"data_{wavelength}/RT.fits")
+                data = hdul[0].data[0][0][0]
+
+                integrated_flux = np.sum(data)
+
+                if j > 0:
+                    running_flux += trapezoid_rule(wavelengths[j - 1], wavelength, old_integrated_flux * M_band_samples[wavelengths[j - 1]], 
+                                            integrated_flux * M_band_samples[wavelength])
+                    running_transmittance += trapezoid_rule(wavelengths[j - 1], wavelength, M_band_samples[wavelengths[j - 1]], M_band_samples[wavelength])
+                    
+                old_integrated_flux = integrated_flux
+            integrated_flux = running_flux
+
+        elif type(wavelength) == int or type(wavelength) == float:
+            with gzip.open(current_dir + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
+                    with open(current_dir + f'data_{wavelength}/RT.fits', 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+            hdul = fits.open(current_dir + f"data_{wavelength}/RT.fits")
+            data = hdul[0].data[0][0][0]
+            integrated_flux = np.sum(data)
+        
+        fluxes[i] = integrated_flux
+    
+    fig, ax = plt.subplots()
+    ax.scatter(phases, fluxes)
+    ax.set(xlabel='Phase', ylabel='Flux (W/m^2)', yscale='log')
+    fig.savefig(folder+'/lightcurve.png', dpi=400, bbox_inches='tight')
+
