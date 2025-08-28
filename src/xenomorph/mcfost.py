@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import os
 import gzip
 import shutil
+import itertools
 
 import src.xenomorph.geometry as gm
 import src.xenomorph.systems as wrb
@@ -17,6 +18,7 @@ stef_boltz = 5.670374419e-8     # W/m^2/K^4
 solar_radius = 696340000        # m
 solar_lum = 3.83e+26             # W
 
+# filter transmittances gotten from https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
 H_band_samples = {1.45 : 0.0715157, 1.5328 : 0.662124, 1.56397 : 0.652174, 1.634 : 0.687081, 1.7 : 0.637728, 1.78 : 0.05}
 for wavelength in H_band_samples:
     H_band_samples[wavelength] *= 1.2464    # the transmittances used above are for the blocked H filter, so need to multiply all the transmittance vals
@@ -25,8 +27,10 @@ L_band_samples = {3.1309 : 0.01, 3.23 : 0.921975, 3.7037 : 0.925085, 3.751 : 0.9
 M_band_samples = {4.4484 : 0.010919, 4.6 : 0.81075, 4.708 : 0.840764, 4.8828 : 0.90181, 5.0454 : 0.79153, 5.11247 : 0.86137, 5.27426 : 0.010345}
 
 bandpasses = {'H': H_band_samples, 'K': K_band_samples, 'L': L_band_samples, 'M': M_band_samples}
-
 # band 0-mag fluxes here? https://about.ifa.hawaii.edu/ukirt/calibration-and-standards/astronomical-utilities/zero-mag-fluxes-and-conversions/
+zero_points = {'H': 1.18e-09, 'K': 4e-10, 'L': 7.3e-11, 'M': 2.12e-11}
+
+
 
 def trapezoid_rule(x1, x2, y1, y2):
     ''' Calculates the area of the trapezoid made by two points.
@@ -58,7 +62,7 @@ def filter_bandpasses(filter):
     return bandpasses[filter]
 
 
-def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400, resolution=600, root_dir=''):
+def mcfost_points(stardata, shells, filename, n_t=1000, n_points=400, resolution=600, root_dir=''):
     ''' Generates points that can be fed into a new version of MCFOST for radiative transfer calculations.
     Once generated, you could use these points with MCFOST via:
 
@@ -71,9 +75,6 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
         The system parameter file.
     shells : int
         The number of shells to generate.
-    shell_mass : float
-        The mass (in units of Solar masses) of *each* dust shell. This assumes MCFOST is using a 1:100 dust:gas mass ratio, so the actual mass will be
-        multiplied by 100. That is, the user-entered mass here is just for the dust.
     filename : str
         The name of the file to save the points into. This *must* include a '.fits' suffix.
     n_t : int
@@ -116,10 +117,10 @@ def mcfost_points(stardata, shells, shell_mass, filename, n_t=1000, n_points=400
     weights = weights[filter]
 
     # assign masses to each point
-    masses = 1e2 * shell_mass * shells * weights / jnp.sum(weights)     # the 1e2 factor assumes a 1:100 dust:gas mass ratio, and these are actually the gas masses
+    masses = 1e2 * stardata['dust_mass'] * shells * weights / jnp.sum(weights)     # the 1e2 factor assumes a 1:100 dust:gas mass ratio, and these are actually the gas masses
     
     # particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost!)
-    particles *= np.random.normal(1, 5e-5, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost!)
+    particles *= np.random.normal(1, 1e-3, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost/voro++!)
 
     fits_masses = fits.PrimaryHDU(masses)
     fits_positions = fits.ImageHDU(particles.T)     # transposed to get the orientation right (although it doesnt affect the calc at all)
@@ -213,10 +214,10 @@ def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, 
                     "  -0.5  0.0    	          surface density exponent (or -gamma for tappered-edge disk or volume density for envelope), usually < 0, -gamma_exp (or alpha_in & alpha_out for debris disk)\n\n")
     parafile.write("#Grain properties\n"+\
                     "  1  Number of species\n"+\
-                    "  Mie  1 2  0.0  1.0  0.9 Grain type (Mie or DHS), N_components, mixing rule (1 = EMT or 2 = coating),  porosity, mass fraction, Vmax (for DHS)\n"+\
+                    "  Mie  1 2  0.2  1.0  0.9 Grain type (Mie or DHS), N_components, mixing rule (1 = EMT or 2 = coating),  porosity, mass fraction, Vmax (for DHS)\n"+\
                     "  ac_opct.dat  1.0  Optical indices file, volume fraction\n"+\
                     "  1	                  Heating method : 1 = RE + LTE, 2 = RE + NLTE, 3 = NRE\n"+\
-                    "  0.03  1.0 3.5 100 	  amin, amax [mum], aexp, n_grains (log distribution)\n\n")
+                    f"  {stardata['amin']}  {stardata['amax']} {stardata['aexp']:.1f} 100 	  amin, amax [mum], aexp, n_grains (log distribution)\n\n")
     parafile.write("#Molecular RT settings\n"+\
                     "  T T T                   lpop, laccurate_pop, LTE\n"+\
                     "  0.05 km/s		  Turbulence velocity, unit km/s or cs\n"+\
@@ -327,18 +328,27 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
 
     slurmfile.close()
 
+def sample_phases(method, n_samples):
+    '''
+    '''
+    if method == 'equal':
+        phase_samples = jnp.arange(0, 1, 1. / n_samples)
+    else:   # must be 'periastron_dense' in this case
+        # we should overhaul periastron_dense to take into account the dust turn on/off to well sample around this
+        phase_samples_first_half = jnp.logspace(-3, jnp.log10(0.5), n_samples//2) 
+        phase_samples_second_half = 1 - jnp.logspace(-3, jnp.log10(0.5), n_samples - n_samples//2 + 1)[:-1][::-1]
+        phase_samples = jnp.append(phase_samples_first_half, phase_samples_second_half)
+    
+    return phase_samples
 
-def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=2e7, T_photons=1e7, gas_2_dust=100, 
-                        resolution=30, root_dir='', cpus=8, run_hours=2, memory=4, job_name="mcfost-lightcurve", email='ryan.white1@hdr.mq.edu.au', 
+def generate_lightcurve(stardata, wavelength, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=2e7, T_photons=1e7, gas_2_dust=100, 
+                        resolution=30, root_dir='', cpus=8, run_hours=2, memory=4, job_name="mcfost-lightcurve", email='', 
                         mcfost_setup='~/setup_mcfost'):
     '''
     Parameters
     ----------
     stardata : dict
         The system parameter file.
-    shell_mass : float
-        The mass (in units of Solar masses) of *each* dust shell. This assumes MCFOST is using a 1:100 dust:gas mass ratio, so the actual mass will be
-        multiplied by 100. That is, the user-entered mass here is just for the dust.
     wavelength : int or float, or str or dict
         The wavelength (in microns) that you'd like to generate the image for.
         If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
@@ -383,14 +393,7 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
             export MCFOST_UTILS=/<path to mcfost>/mcfost/utils 
     '''
     if type(method) == str:
-        n_samples = n_samples
-        if method == 'equal':
-            phase_samples = jnp.arange(0, 1, 1. / n_samples)
-        else:   # must be 'periastron_dense' in this case
-            # we should overhaul periastron_dense to take into account the dust turn on/off to well sample around this
-            phase_samples_first_half = jnp.logspace(-3, jnp.log10(0.5), n_samples//2) 
-            phase_samples_second_half = 1 - jnp.logspace(-3, jnp.log10(0.5), n_samples - n_samples//2 + 1)[:-1][::-1]
-            phase_samples = jnp.append(phase_samples_first_half, phase_samples_second_half)
+        phase_samples = sample_phases(method, n_samples)
     else:
         phase_samples = method.copy()
         n_samples = len(method)
@@ -407,7 +410,7 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
         stardata_sample = stardata.copy()
         stardata_sample['phase'] = phase
         # start by creating all of the density files within sampled phase directories
-        mcfost_points(stardata_sample, shells, shell_mass, 'densityfile.fits', n_t=n_t, n_points=n_points, resolution=resolution, root_dir=phase_dir)
+        mcfost_points(stardata_sample, shells, 'densityfile.fits', n_t=n_t, n_points=n_points, resolution=resolution, root_dir=phase_dir)
 
         # now create the para files (doing them seperately for now in case we want to change grain size params later on)
         generate_para(stardata_sample, 'systempara', 'densityfile.fits', photons=photons, T_photons=T_photons, resolution=resolution, 
@@ -423,17 +426,24 @@ def generate_lightcurve(stardata, shell_mass, wavelength, method='equal', n_samp
     bashscript.writelines(lines)
     bashscript.close()
 
-def lightcurve_plot(folder, wavelength):
+def lightcurve_plot(folder, wavelength, phases='equal'):
     '''
     Some help gotten from https://stackoverflow.com/questions/973473/getting-a-list-of-all-subdirectories-in-the-current-directory
     Todo:
         - account for custom phase samples
+    Parameters:
+    -----------
+    folder : str
+    wavelength : 
+    phases : str or j/np.array
     '''
     subdirectories = [f.name for f in os.scandir(folder) if f.is_dir()]
     n_samples = len(subdirectories)
     sample_nums = [int(subdirectory[7:]) for subdirectory in subdirectories]
 
-    phases = np.arange(0, 1, 1 / n_samples)
+    if type(phases) == str:
+        phases = sample_phases(phases, n_samples)
+        
     fluxes = np.zeros(n_samples)
 
     for i in range(n_samples):
@@ -441,26 +451,28 @@ def lightcurve_plot(folder, wavelength):
         if type(wavelength) == str or type(wavelength) == dict:
             if type(wavelength) == str:
                 wavelengths = list(bandpasses[wavelength].keys())
+                transmittances = bandpasses[wavelength].copy()
             elif type(wavelength) == dict:
                 wavelengths = list(wavelength.keys())
+                transmittances = wavelength.copy()
 
             running_flux = 0
             running_transmittance = 0
 
-            for j, wavelength in enumerate(wavelengths):
-                with gzip.open(current_dir + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
-                    with open(current_dir + f'data_{wavelength}/RT.fits', 'wb') as f_out:
+            for j, LAMBDA in enumerate(wavelengths):
+                with gzip.open(current_dir + f'data_{LAMBDA}/RT.fits.gz', 'rb') as f_in:
+                    with open(current_dir + f'data_{LAMBDA}/RT.fits', 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
             
-                hdul = fits.open(current_dir + f"data_{wavelength}/RT.fits")
+                hdul = fits.open(current_dir + f"data_{LAMBDA}/RT.fits")
                 data = hdul[0].data[0][0][0]
 
                 integrated_flux = np.sum(data)
 
                 if j > 0:
-                    running_flux += trapezoid_rule(wavelengths[j - 1], wavelength, old_integrated_flux * M_band_samples[wavelengths[j - 1]], 
-                                            integrated_flux * M_band_samples[wavelength])
-                    running_transmittance += trapezoid_rule(wavelengths[j - 1], wavelength, M_band_samples[wavelengths[j - 1]], M_band_samples[wavelength])
+                    running_flux += trapezoid_rule(wavelengths[j - 1], LAMBDA, old_integrated_flux * transmittances[wavelengths[j - 1]], 
+                                            integrated_flux * transmittances[LAMBDA])
+                    running_transmittance += trapezoid_rule(wavelengths[j - 1], LAMBDA, transmittances[wavelengths[j - 1]], transmittances[LAMBDA])
                     
                 old_integrated_flux = integrated_flux
             integrated_flux = running_flux
@@ -475,8 +487,114 @@ def lightcurve_plot(folder, wavelength):
         
         fluxes[i] = integrated_flux
     
+    phases = np.append(np.append(phases - 1, phases), phases + 1)
+    fluxes = np.tile(fluxes, 3)
+    
     fig, ax = plt.subplots()
-    ax.scatter(phases, fluxes)
-    ax.set(xlabel='Phase', ylabel='Flux (W/m^2)', yscale='log')
+    ax.plot(phases, fluxes)
+    ax.set(xlabel='Phase', ylabel='Flux (W/m^2)', yscale='log', xlim=(-0.05, 1.05))
     fig.savefig(folder+'/lightcurve.png', dpi=400, bbox_inches='tight')
 
+    if type(wavelength) == str:
+        mags = -2.512 * np.log10(fluxes) + 2.512 * np.log10(zero_points[wavelength])
+        fig, ax = plt.subplots()
+        if n_samples >= 30:
+            ax.plot(phases, mags)
+        else:
+            ax.scatter(phases, mags)
+        ax.set(xlabel='Phase', ylabel='Magnitude', xlim=(-0.05, 1.05))
+        ax.invert_yaxis()
+        fig.savefig(folder+'/lightcurve_mag.png', dpi=400, bbox_inches='tight')
+
+def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=2e7, T_photons=1e7, gas_2_dust=100, 
+                        resolution=30, root_dir='', cpus=8, run_hours=2, memory=4, job_name="mcfost-lightcurve", email='', 
+                        mcfost_setup='~/setup_mcfost'):
+    '''
+    stardata : dict
+        The system parameter file.
+    wavelength : int or float, or str or dict
+        The wavelength (in microns) that you'd like to generate the image for.
+        If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
+        If wavelength is a dict, it will be as for the str case, but for user-defined wavelengths.
+    parameter_grid : dict
+        A dictionary where each key corresponds to the parameter of `stardata` being changed. The value for that key should be an array corresponding to the different values
+        which will be used to generate a light curve. Hence, there will be n_param1 * n_param2 * ... light curves generated from this.  
+    method : str or j/np.array
+        This parameter dictates how the time samples across orbital phase are distributed. If method=='equal', there will be n_samples equally spaced samples across 
+        orbital phase 0 to 1 to construct the light curve. If method=='periastron_dense', there will be proportionally more samples around periastron (when there 
+        is active dust production). If method is a j/np array, the values of the one-dimensional array will be used as the phase samples.
+    n_samples : int
+        The number of orbital phase samples with which to construct the light curve. This is only relevant if the `method` parameter is a string. 
+    shells : int
+        The number of shells to generate.
+    n_t : int
+        The number of rings to generate in each shell.
+    n_points : int
+        The number of points to generate in each ring.
+    photons : int
+        The number of photons to use in the imaging computation.
+    T_photons : int
+        The number of photons to use in the T computation
+    gas_2_dust : float 
+        The mass of gas relative to the dust in each particle
+    resolution : int
+        The number of pixels (per side) for the geometric comparison image.
+    root_dir : str
+        The directory where you'd like the output of the job to be.
+    cpus : int
+        The number of CPUs you'd like to allocate to running this MCFOST job. A power of 2 is usually good.
+    run_hours : int
+        How many (wall-time) hours you'd like to set the job to run before the scheduling system cancels it.
+    memory : float or int
+        The amount of memory (in GB) to allocate to the job. 
+        In my experience they typically use of order a few hundred MB, so setting 1-4GB is usually safe.
+    job_name : str
+        A name for the job (only visible on the HPC queue system).
+    email : str
+        The email of the user, should they want email updates on how the job is doing. Mine by default :)
+    mcfost_setup : str
+        The location (and name) of the mcfost_setup file. This file is meant to be read each time an MCFOST job is run on a HPC. 
+        A typical ~/setup_mcfost file will look like:
+            export PATH=/<path to mcfost>/mcfost/bin:${PATH}
+            export MCFOST_UTILS=/<path to mcfost>/mcfost/utils 
+    '''
+    if root_dir != '':
+        write_dir = f'{root_dir}/'
+    else:
+        write_dir = ''
+        
+    parameters = list(parameter_grid.keys())
+    n_params = len(parameters)
+
+    param_ranges = [parameter_grid[parameter] for parameter in parameters]
+    iterations = [range(len(parameter_grid[parameter])) for parameter in parameters]
+
+    dirs = []
+
+    for iteration in itertools.product(*iterations):
+        iter_stardata = stardata.copy()
+        iter_counts = iteration
+        run_str = ''
+        for i, iter_count in enumerate(iter_counts):
+            iter_stardata[parameters[i]] = param_ranges[i][iter_count]
+            prefix = '-' if i != 0 else '' 
+            run_str += prefix + str(parameters[i]) + '_' + str(iter_count)
+
+        generate_lightcurve(iter_stardata, wavelength, method=method, n_samples=n_samples, shells=shells, n_t=n_t, n_points=n_points, photons=photons, 
+                            T_photons=T_photons, gas_2_dust=gas_2_dust, resolution=resolution, root_dir=write_dir + run_str, 
+                            cpus=cpus, run_hours=run_hours, memory=memory, job_name=job_name + run_str, 
+                            email=email, mcfost_setup=mcfost_setup)
+        
+        dirs.append(run_str)
+        
+    # now write a bash script to queue all of the ozstar jobs
+    lines = [f'declare -a arr=("{dirs[0]}"\n']
+    for directory in dirs[1:]:
+        lines.append(f'                "{directory}"\n')
+    lines.append('                )\n')
+    add_lines = ['for i in "${arr[@]}"\n', 'do\n', f" cd $i\n", f" bash generate_lightcurve.sh\n", f" cd ..\n", "done\n"]
+    for line in add_lines:
+        lines.append(line)
+    bashscript = io.open(f'{write_dir}generate_lightcurve_grid.sh', 'w', newline='\n')
+    bashscript.writelines(lines)
+    bashscript.close()
