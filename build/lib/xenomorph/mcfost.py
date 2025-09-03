@@ -426,6 +426,70 @@ def generate_lightcurve(stardata, wavelength, method='equal', n_samples=20, shel
     bashscript.writelines(lines)
     bashscript.close()
 
+def integrate_flux(wavelength, folder):
+    ''' Searches for MCFOST output files and calculates the integrated flux at a single wavelength or across a filter. 
+
+    Parameters
+    ----------
+    wavelength : int or float, or str or dict
+        The wavelength (in microns) that you'd like to generate the image for.
+        If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
+        If wavelength is a dict, it will be as for the str case, but for user-defined wavelengths.
+    folder : str
+        The location of the folder in which each of the MCFOST wavelength outputs are. For example, if the outputs were in 
+        f1
+        --f2
+        ----data_3.1
+        ------------RT.fits.gz
+        ----data_3.2
+        ------------RT.fits.gz
+        etc, this variable should be "f1/f2/"
+    Returns
+    -------
+    integrated_flux : float
+        The integrated flux in units of W/m^2 (or W/m^2/μm if wavelength is a single number) for that image. 
+    '''
+    read_folder = folder if folder[-1] == "/" else folder + "/"
+
+    if type(wavelength) == str or type(wavelength) == dict:
+        if type(wavelength) == str:
+            wavelengths = list(bandpasses[wavelength].keys())
+            transmittances = bandpasses[wavelength].copy()
+        elif type(wavelength) == dict:
+            wavelengths = list(wavelength.keys())
+            transmittances = wavelength.copy()
+
+        running_flux = 0
+        running_transmittance = 0
+
+        for j, LAMBDA in enumerate(wavelengths):
+            with gzip.open(read_folder + f'data_{LAMBDA}/RT.fits.gz', 'rb') as f_in:
+                with open(read_folder + f'data_{LAMBDA}/RT.fits', 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+        
+            hdul = fits.open(read_folder + f"data_{LAMBDA}/RT.fits")
+            data = hdul[0].data[0][0][0]
+
+            integrated_flux = np.sum(data)
+
+            if j > 0:
+                running_flux += trapezoid_rule(wavelengths[j - 1], LAMBDA, old_integrated_flux * transmittances[wavelengths[j - 1]], 
+                                        integrated_flux * transmittances[LAMBDA])
+                running_transmittance += trapezoid_rule(wavelengths[j - 1], LAMBDA, transmittances[wavelengths[j - 1]], transmittances[LAMBDA])
+                
+            old_integrated_flux = integrated_flux
+        integrated_flux = running_flux
+
+    elif type(wavelength) == int or type(wavelength) == float:
+        with gzip.open(read_folder + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
+                with open(read_folder + f'data_{wavelength}/RT.fits', 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+        hdul = fits.open(read_folder + f"data_{wavelength}/RT.fits")
+        data = hdul[0].data[0][0][0]
+        integrated_flux = np.sum(data)
+
+    return integrated_flux
+
 def lightcurve_plot(folder, wavelength, phases='equal'):
     '''
     Some help gotten from https://stackoverflow.com/questions/973473/getting-a-list-of-all-subdirectories-in-the-current-directory
@@ -448,44 +512,7 @@ def lightcurve_plot(folder, wavelength, phases='equal'):
 
     for i in range(n_samples):
         current_dir = folder + f'/sample_{i}/'
-        if type(wavelength) == str or type(wavelength) == dict:
-            if type(wavelength) == str:
-                wavelengths = list(bandpasses[wavelength].keys())
-                transmittances = bandpasses[wavelength].copy()
-            elif type(wavelength) == dict:
-                wavelengths = list(wavelength.keys())
-                transmittances = wavelength.copy()
-
-            running_flux = 0
-            running_transmittance = 0
-
-            for j, LAMBDA in enumerate(wavelengths):
-                with gzip.open(current_dir + f'data_{LAMBDA}/RT.fits.gz', 'rb') as f_in:
-                    with open(current_dir + f'data_{LAMBDA}/RT.fits', 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-            
-                hdul = fits.open(current_dir + f"data_{LAMBDA}/RT.fits")
-                data = hdul[0].data[0][0][0]
-
-                integrated_flux = np.sum(data)
-
-                if j > 0:
-                    running_flux += trapezoid_rule(wavelengths[j - 1], LAMBDA, old_integrated_flux * transmittances[wavelengths[j - 1]], 
-                                            integrated_flux * transmittances[LAMBDA])
-                    running_transmittance += trapezoid_rule(wavelengths[j - 1], LAMBDA, transmittances[wavelengths[j - 1]], transmittances[LAMBDA])
-                    
-                old_integrated_flux = integrated_flux
-            integrated_flux = running_flux
-
-        elif type(wavelength) == int or type(wavelength) == float:
-            with gzip.open(current_dir + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
-                    with open(current_dir + f'data_{wavelength}/RT.fits', 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-            hdul = fits.open(current_dir + f"data_{wavelength}/RT.fits")
-            data = hdul[0].data[0][0][0]
-            integrated_flux = np.sum(data)
-        
-        fluxes[i] = integrated_flux
+        fluxes[i] = integrate_flux(wavelength, current_dir)
     
     phases = np.append(np.append(phases - 1, phases), phases + 1)
     fluxes = np.tile(fluxes, 3)
@@ -507,7 +534,7 @@ def lightcurve_plot(folder, wavelength, phases='equal'):
         fig.savefig(folder+'/lightcurve_mag.png', dpi=400, bbox_inches='tight')
 
 def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=2e7, T_photons=1e7, gas_2_dust=100, 
-                        resolution=30, root_dir='', cpus=8, run_hours=2, memory=4, job_name="mcfost-lightcurve", email='', 
+                        resolution=30, root_dir='', cpus=8, run_hours=1, memory=2, job_name="mcfost-lightcurve", email='', 
                         mcfost_setup='~/setup_mcfost'):
     '''
     stardata : dict
@@ -571,11 +598,7 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
 
     dirs = []
 
-    # for params in itertools.product(*param_ranges):
-        # iter_stardata = stardata.copy()
-        # loop_vals = *params
-        # for i, parameter in enumerate(parameters):
-        #     iter_stardata[parameter] = loop_vals[i]
+    # the directory search in this loop needs to be the same as the one in read_lightcurve_grid()
     for iteration in itertools.product(*iterations):
         iter_stardata = stardata.copy()
         iter_counts = iteration
@@ -603,3 +626,57 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
     bashscript = io.open(f'{write_dir}generate_lightcurve_grid.sh', 'w', newline='\n')
     bashscript.writelines(lines)
     bashscript.close()
+
+def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=20, root_dir=''):
+    '''
+    Parameters
+    ----------
+    wavelength : int or float, or str or dict
+        The wavelength (in microns) that you'd like to generate the image for.
+        If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
+        If wavelength is a dict, it will be as for the str case, but for user-defined wavelengths.
+    parameter_grid : dict
+        A dictionary where each key corresponds to the parameter of `stardata` being changed. The value for that key should be an array corresponding to the different values
+        which will be used to generate a light curve. Hence, there will be n_param1 * n_param2 * ... light curves generated from this.  
+    method : str or j/np.array
+        This parameter dictates how the time samples across orbital phase are distributed. If method=='equal', there will be n_samples equally spaced samples across 
+        orbital phase 0 to 1 to construct the light curve. If method=='periastron_dense', there will be proportionally more samples around periastron (when there 
+        is active dust production). If method is a j/np array, the values of the one-dimensional array will be used as the phase samples.
+    n_samples : int
+        The number of orbital phase samples with which to construct the light curve. This is only relevant if the `method` parameter is a string.
+    root_dir : str
+        The directory where you'd like the output of the job to be.
+    '''
+    if root_dir != '':
+        read_dir = f'{root_dir}/'
+    else:
+        read_dir = ''
+
+    parameters = list(parameter_grid.keys())
+    n_params = len(parameters)
+
+    param_ranges = [parameter_grid[parameter] for parameter in parameters]
+    iterations = [range(len(parameter_grid[parameter])) for parameter in parameters]
+
+    dimensions = iterations.copy() + [n_samples]
+    grid_array = np.zeros(tuple(dimensions))
+
+    # the directory search in this loop needs to be the same as the one in lightcurve_grid()
+    for iteration in itertools.product(*iterations):
+        iter_stardata = stardata.copy()
+        iter_counts = iteration
+        current_dir = ''
+        for i, iter_count in enumerate(iter_counts):
+            iter_stardata[parameters[i]] = param_ranges[i][iter_count]
+            prefix = '-' if i != 0 else '' 
+            current_dir += prefix + str(parameters[i]) + '_' + str(iter_count)
+
+        for sample in range(n_samples):
+            curr_index = tuple(list(iter_counts) + [sample])
+            grid_array[curr_index] = integrate_flux(wavelength, read_dir + current_dir)
+        
+
+    
+    
+    
+# parameter_grid = {'dust_mass':np.logspace(-10, -6, 10), 'aexp':np.linspace(-4, 4, 10)}
