@@ -95,6 +95,9 @@ def mcfost_points(stardata, shells, filename, n_t=1000, n_points=400, resolution
     stardatacopy['sigma'] = 0.5
     particles, weights = gm.dust_plume_custom(stardatacopy, shells, n_t=n_t, n_points=n_points)
 
+    # particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost!)
+    particles *= np.random.normal(1, 2e-3, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost/voro++!)
+
     # make an image of what we expect from the stock geometric model so we can compare with the radiative transfer output
     fig, ax = plt.subplots()
     xbound, ybound = jnp.max(jnp.abs(particles[0, :])), jnp.max(jnp.abs(particles[1, :]))
@@ -118,9 +121,6 @@ def mcfost_points(stardata, shells, filename, n_t=1000, n_points=400, resolution
 
     # assign masses to each point
     masses = 1e2 * stardata['dust_mass'] * shells * weights / jnp.sum(weights)     # the 1e2 factor assumes a 1:100 dust:gas mass ratio, and these are actually the gas masses
-    
-    # particles += np.random.normal(0, 5e-2, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost!)
-    particles *= np.random.normal(1, 1e-3, size=(3, len(weights)))    # add small random offsets to the particles (in au) to stop the tesselation from crashing (strange bug with mcfost/voro++!)
 
     fits_masses = fits.PrimaryHDU(masses)
     fits_positions = fits.ImageHDU(particles.T)     # transposed to get the orientation right (although it doesnt affect the calc at all)
@@ -657,23 +657,29 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
 
     param_ranges = [parameter_grid[parameter] for parameter in parameters]
     iterations = [range(len(parameter_grid[parameter])) for parameter in parameters]
+    param_dimensions = [len(parameter_grid[parameter]) for parameter in parameters]
 
-    dimensions = iterations.copy() + [n_samples]
+    dimensions = param_dimensions.copy() + [n_samples]
     grid_array = np.zeros(tuple(dimensions))
 
     # the directory search in this loop needs to be the same as the one in lightcurve_grid()
     for iteration in itertools.product(*iterations):
-        iter_stardata = stardata.copy()
+        # iter_stardata = stardata.copy()
         iter_counts = iteration
         current_dir = ''
         for i, iter_count in enumerate(iter_counts):
-            iter_stardata[parameters[i]] = param_ranges[i][iter_count]
+            # iter_stardata[parameters[i]] = param_ranges[i][iter_count]
             prefix = '-' if i != 0 else '' 
             current_dir += prefix + str(parameters[i]) + '_' + str(iter_count)
 
         for sample in range(n_samples):
             curr_index = tuple(list(iter_counts) + [sample])
-            grid_array[curr_index] = integrate_flux(wavelength, read_dir + current_dir)
+            try:
+                curr_flux = integrate_flux(wavelength, read_dir + current_dir + f'/sample_{sample}/')
+                grid_array[curr_index] = curr_flux
+            except:
+                continue
+            
         
 
     
