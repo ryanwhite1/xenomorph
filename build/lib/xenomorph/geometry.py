@@ -1584,6 +1584,32 @@ def output_points(stardata, shells, filename, n_t=1000, n_points=400):
     
     np.save(filename, output)
 
+def output_points_csv(stardata, shells, filename, n_t=1000, n_points=400):
+    ''' Saves a (4 x ~shells*n_t*n_points) file in .npy format, where the first 3 axes are the x-y-z spatial coordinates of the points (in AU) 
+        relative to the system CoM, and the 4th axis are the weights of each point. 
+    
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    shells : int
+        The number of shells to generate
+    filename : str
+        The name of the file to save the points into. A '.npy' extension will automatically be added to the end.
+    n_t : int
+        The number of rings to generate in each shell
+    n_points : int
+        The number of points to generate in each ring
+    '''
+    particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
+
+    filter = np.where(weights > 0)[0]
+
+    particles = particles[:, filter]
+    weights = weights[filter]
+    
+    np.savetxt(filename, particles, delimiter=',', newline='\n')
+
 # print(ring_velocities(wrb.apep_aniso.copy(), 1, 400))
 
 # system = wrb.apep.copy()

@@ -673,7 +673,9 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
             current_dir += prefix + str(parameters[i]) + '_' + str(iter_count)
 
         for sample in range(n_samples):
-            curr_index = tuple(list(iter_counts) + [sample])
+            # ndarray indexing with variable number of indices from https://numpy.org/devdocs/user/basics.indexing.html#dealing-with-variable-numbers-of-indices-within-programs
+            curr_index = tuple(list(iter_counts) + [sample])    
+
             try:
                 curr_flux = integrate_flux(wavelength, read_dir + current_dir + f'/sample_{sample}/')
                 grid_array[curr_index] = curr_flux
