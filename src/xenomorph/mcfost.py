@@ -16,7 +16,7 @@ import src.xenomorph.systems as wrb
 
 stef_boltz = 5.670374419e-8     # W/m^2/K^4
 solar_radius = 696340000        # m
-solar_lum = 3.83e+26             # W
+solar_lum = 3.83e+26            # W
 
 # filter transmittances gotten from https://irtfweb.ifa.hawaii.edu/~nsfcam2/Filter_Profiles.html
 H_band_samples = {1.45 : 0.0715157, 1.5328 : 0.662124, 1.56397 : 0.652174, 1.634 : 0.687081, 1.7 : 0.637728, 1.78 : 0.05}
@@ -90,6 +90,8 @@ def mcfost_points(stardata, shells, filename, n_t=1000, n_points=400, resolution
         save_dir = root_dir + '/'
     else:
         save_dir = root_dir
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
     
     stardatacopy = stardata.copy()
     stardatacopy['sigma'] = 0.5
@@ -250,7 +252,7 @@ def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, 
     parafile.close()
 
 
-def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_hours=4, memory=4, root_dir='', job_name="mcfost-transfer",
+def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_hours=4, memory=4, random_voro=True, root_dir='', job_name="mcfost-transfer",
                    email='ryan.white1@hdr.mq.edu.au', mcfost_setup='~/setup_mcfost'):
     ''' Generates a slurm script to run a *single* radiative transfer calculation on a xenomorph-generated spiral. 
     The script will generate the temperature profile of the (currently default-only) dust, and then image it and the specified wavelength.
@@ -277,6 +279,9 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     memory : float or int
         The amount of memory (in GB) to allocate to the job. 
         In my experience they typically use of order a few hundred MB, so setting 1-4GB is usually safe.
+    random_voro : bool
+        If True, the Voronoi mesh in MCFOST will be randomised; this results in a significant speed up of the temperature calculation, at the cost of not being able to spatially interpret the resulting temperature map.
+        If False, the Voronoi mesh will be computed in order; this makes the code very, *very* slow, but allows you to map the temperature distribution of particles to 3D space.
     root_dir : str
         The directory where you'd like the output of the job to be. 
     job_name : str
@@ -308,16 +313,22 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     initialise_lines = ['echo "HOSTNAME = $HOSTNAME"\n', 'echo "HOSTTYPE = $HOSTTYPE"\n',
                         'echo Time is `date`\n', 'echo Directory is `pwd`\n', '\n']
     
-    environment_lines = ['ulimit -s unlimited\n', f'source {mcfost_setup}\n', f'export OMP_NUM_THREADS={cpus}\n', 
+    environment_lines = ['export OMP_STACKSIZE=512M\n', 'ulimit -s unlimited\n', f'source {mcfost_setup}\n', f'export OMP_NUM_THREADS={cpus}\n', 
                          '\n', 'echo "Starting mcfost..."\n', '\n']
 
-    mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb\n']
+    # mcfost line to compute temperature structure
+    mcfost_lines = [f'mcfost {para_file} -df {density_file} -fix_star -star_bb']
+    if random_voro:
+        mcfost_lines.append('\n')
+    else:
+        mcfost_lines.append(' -not_random_Voronoi\n')
+    # now do lines to compute ray traced images
     if type(wavelength) == str or type(wavelength) == dict:
         wavelengths = list(bandpasses[wavelength].keys()) if type(wavelength) == str else list(wavelength.keys())
         for sample_lambda in wavelengths:
-            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {sample_lambda}\n')
+            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {sample_lambda}')
     else:
-        mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}\n')
+        mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}')
 
     slurmfile = io.open(f'{write_dir + slurmname}.q', 'w', newline='\n')
 
