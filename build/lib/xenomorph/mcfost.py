@@ -10,6 +10,7 @@ import os
 import gzip
 import shutil
 import itertools
+import pickle
 
 import src.xenomorph.geometry as gm
 import src.xenomorph.systems as wrb
@@ -638,6 +639,9 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
     bashscript.writelines(lines)
     bashscript.close()
 
+    with open(write_dir + 'parameter_grid.pkl', 'wb') as outp:
+        pickle.dump(parameter_grid, outp)
+
 def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=20, root_dir=''):
     '''
     Parameters
@@ -657,6 +661,10 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
         The number of orbital phase samples with which to construct the light curve. This is only relevant if the `method` parameter is a string.
     root_dir : str
         The directory where you'd like the output of the job to be.
+    Returns
+    -------
+    grid_array : np.array of dimension (len(parameter_grid.keys()) x n_samples)
+        d0ijf0ijapok
     '''
     if root_dir != '':
         read_dir = f'{root_dir}/'
@@ -692,6 +700,7 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
                 grid_array[curr_index] = curr_flux
             except:
                 continue
+    return grid_array
             
         
 
