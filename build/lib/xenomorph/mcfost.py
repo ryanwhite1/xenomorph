@@ -502,7 +502,7 @@ def integrate_flux(wavelength, folder):
             with gzip.open(read_folder + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
                     with open(read_folder + f'data_{wavelength}/RT.fits', 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                        
+
         hdul = fits.open(read_folder + f"data_{wavelength}/RT.fits")
         data = hdul[0].data[0][0][0]
         integrated_flux = np.sum(data)
@@ -686,10 +686,10 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
     
     read_file = False
     if load:
-        read_file = os.path.isfile(write_dir + 'grid_array.npy')
+        read_file = os.path.isfile(read_dir + 'grid_array.npy')
     
     if read_file:
-        grid_array = np.load(write_dir + 'grid_array.npy')
+        grid_array = np.load(read_dir + 'grid_array.npy')
     else:
         parameters = list(parameter_grid.keys())
         n_params = len(parameters)
@@ -722,7 +722,7 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
                     continue
         
         if save:
-            np.save(write_dir + 'grid_array.npy', grid_array)
+            np.save(read_dir + 'grid_array.npy', grid_array)
         
     return grid_array
             
