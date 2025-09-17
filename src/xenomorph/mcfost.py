@@ -475,9 +475,12 @@ def integrate_flux(wavelength, folder):
         running_transmittance = 0
 
         for j, LAMBDA in enumerate(wavelengths):
-            with gzip.open(read_folder + f'data_{LAMBDA}/RT.fits.gz', 'rb') as f_in:
-                with open(read_folder + f'data_{LAMBDA}/RT.fits', 'wb') as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+            can_read = os.path.isfile(read_folder + f'data_{LAMBDA}/RT.fits')   # will be True if the already unzipped .fits file exists
+
+            if not can_read:    # then we need to unzip it
+                with gzip.open(read_folder + f'data_{LAMBDA}/RT.fits.gz', 'rb') as f_in:
+                    with open(read_folder + f'data_{LAMBDA}/RT.fits', 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
         
             hdul = fits.open(read_folder + f"data_{LAMBDA}/RT.fits")
             data = hdul[0].data[0][0][0]
@@ -493,9 +496,13 @@ def integrate_flux(wavelength, folder):
         integrated_flux = running_flux
 
     elif type(wavelength) == int or type(wavelength) == float:
-        with gzip.open(read_folder + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
-                with open(read_folder + f'data_{wavelength}/RT.fits', 'wb') as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+        can_read = os.path.isfile(read_folder + f'data_{wavelength}/RT.fits')   # will be True if the already unzipped .fits file exists
+
+        if not can_read:
+            with gzip.open(read_folder + f'data_{wavelength}/RT.fits.gz', 'rb') as f_in:
+                    with open(read_folder + f'data_{wavelength}/RT.fits', 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+                        
         hdul = fits.open(read_folder + f"data_{wavelength}/RT.fits")
         data = hdul[0].data[0][0][0]
         integrated_flux = np.sum(data)
@@ -642,7 +649,7 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
     with open(write_dir + 'parameter_grid.pkl', 'wb') as outp:
         pickle.dump(parameter_grid, outp)
 
-def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=20, root_dir=''):
+def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=20, root_dir='', save=True, load=True):
     '''
     Parameters
     ----------
@@ -661,6 +668,12 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
         The number of orbital phase samples with which to construct the light curve. This is only relevant if the `method` parameter is a string.
     root_dir : str
         The directory where you'd like the output of the job to be.
+    save : bool
+        If True, saves the grid array to file in the root_dir under the name 'grid_array.npy'
+        If False, the file will not be saved.
+    load : bool
+        If True, checks if there is an existing and saved grid array, and loads it if so. 
+        If False, the function will recompute the grid array.
     Returns
     -------
     grid_array : np.array of dimension (len(parameter_grid.keys()) x n_samples)
@@ -670,36 +683,47 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
         read_dir = f'{root_dir}/'
     else:
         read_dir = ''
+    
+    read_file = False
+    if load:
+        read_file = os.path.isfile(write_dir + 'grid_array.npy')
+    
+    if read_file:
+        grid_array = np.load(write_dir + 'grid_array.npy')
+    else:
+        parameters = list(parameter_grid.keys())
+        n_params = len(parameters)
 
-    parameters = list(parameter_grid.keys())
-    n_params = len(parameters)
+        param_ranges = [parameter_grid[parameter] for parameter in parameters]
+        iterations = [range(len(parameter_grid[parameter])) for parameter in parameters]
+        param_dimensions = [len(parameter_grid[parameter]) for parameter in parameters]
 
-    param_ranges = [parameter_grid[parameter] for parameter in parameters]
-    iterations = [range(len(parameter_grid[parameter])) for parameter in parameters]
-    param_dimensions = [len(parameter_grid[parameter]) for parameter in parameters]
+        dimensions = param_dimensions.copy() + [n_samples]
+        grid_array = np.zeros(tuple(dimensions))
 
-    dimensions = param_dimensions.copy() + [n_samples]
-    grid_array = np.zeros(tuple(dimensions))
+        # the directory search in this loop needs to be the same as the one in lightcurve_grid()
+        for iteration in itertools.product(*iterations):
+            # iter_stardata = stardata.copy()
+            iter_counts = iteration
+            current_dir = ''
+            for i, iter_count in enumerate(iter_counts):
+                # iter_stardata[parameters[i]] = param_ranges[i][iter_count]
+                prefix = '-' if i != 0 else '' 
+                current_dir += prefix + str(parameters[i]) + '_' + str(iter_count)
 
-    # the directory search in this loop needs to be the same as the one in lightcurve_grid()
-    for iteration in itertools.product(*iterations):
-        # iter_stardata = stardata.copy()
-        iter_counts = iteration
-        current_dir = ''
-        for i, iter_count in enumerate(iter_counts):
-            # iter_stardata[parameters[i]] = param_ranges[i][iter_count]
-            prefix = '-' if i != 0 else '' 
-            current_dir += prefix + str(parameters[i]) + '_' + str(iter_count)
+            for sample in range(n_samples):
+                # ndarray indexing with variable number of indices from https://numpy.org/devdocs/user/basics.indexing.html#dealing-with-variable-numbers-of-indices-within-programs
+                curr_index = tuple(list(iter_counts) + [sample])    
 
-        for sample in range(n_samples):
-            # ndarray indexing with variable number of indices from https://numpy.org/devdocs/user/basics.indexing.html#dealing-with-variable-numbers-of-indices-within-programs
-            curr_index = tuple(list(iter_counts) + [sample])    
-
-            try:
-                curr_flux = integrate_flux(wavelength, read_dir + current_dir + f'/sample_{sample}/')
-                grid_array[curr_index] = curr_flux
-            except:
-                continue
+                try:
+                    curr_flux = integrate_flux(wavelength, read_dir + current_dir + f'/sample_{sample}/')
+                    grid_array[curr_index] = curr_flux
+                except:
+                    continue
+        
+        if save:
+            np.save(write_dir + 'grid_array.npy', grid_array)
+        
     return grid_array
             
         
