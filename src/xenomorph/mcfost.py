@@ -552,10 +552,12 @@ def lightcurve_plot(folder, wavelength, phases='equal'):
         ax.invert_yaxis()
         fig.savefig(folder+'/lightcurve_mag.png', dpi=400, bbox_inches='tight')
 
-def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samples=20, shells=1, n_t=600, n_points=200, photons=2e7, T_photons=1e7, gas_2_dust=100, 
+def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', shells=1, n_t=600, n_points=200, photons=2e7, T_photons=1e7, gas_2_dust=100, 
                         resolution=30, root_dir='', cpus=8, run_hours=1, memory=2, job_name="mcfost-lightcurve", email='', 
                         mcfost_setup='~/setup_mcfost'):
-    '''
+    ''' Creates a grid of xenomorph+MCFOST lightcurves within the root_dir, varying input parameters according to the keys and values within the parameter_grid dictionary.
+    Parameters
+    ----------
     stardata : dict
         The system parameter file.
     wavelength : int or float, or str or dict
@@ -565,6 +567,7 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
     parameter_grid : dict
         A dictionary where each key corresponds to the parameter of `stardata` being changed. The value for that key should be an array corresponding to the different values
         which will be used to generate a light curve. Hence, there will be n_param1 * n_param2 * ... light curves generated from this.  
+        There should be another key 'n_samples' within this dictionary which corresponds to how many phase samples the user would like in their light curve.
     method : str or j/np.array
         This parameter dictates how the time samples across orbital phase are distributed. If method=='equal', there will be n_samples equally spaced samples across 
         orbital phase 0 to 1 to construct the light curve. If method=='periastron_dense', there will be proportionally more samples around periastron (when there 
@@ -610,6 +613,11 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
         write_dir = ''
         
     parameters = list(parameter_grid.keys())
+    for param in ['n_samples', 'phases']:
+        try:
+            parameters.remove(param)
+        except:
+            pass
     n_params = len(parameters)
 
     param_ranges = [parameter_grid[parameter] for parameter in parameters]
@@ -627,7 +635,7 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
             prefix = '-' if i != 0 else '' 
             run_str += prefix + str(parameters[i]) + '_' + str(iter_count)
 
-        generate_lightcurve(iter_stardata, wavelength, method=method, n_samples=n_samples, shells=shells, n_t=n_t, n_points=n_points, photons=photons, 
+        generate_lightcurve(iter_stardata, wavelength, method=method, n_samples=parameter_grid['n_samples'], shells=shells, n_t=n_t, n_points=n_points, photons=photons, 
                             T_photons=T_photons, gas_2_dust=gas_2_dust, resolution=resolution, root_dir=write_dir + run_str, 
                             cpus=cpus, run_hours=run_hours, memory=memory, job_name=job_name + run_str, 
                             email=email, mcfost_setup=mcfost_setup)
@@ -646,11 +654,18 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', n_samp
     bashscript.writelines(lines)
     bashscript.close()
 
+    if type(method) == str:
+        phase_samples = sample_phases(method, n_samples)
+    else:
+        phase_samples = method.copy()
+    parameter_grid_copy = parameter_grid.copy()
+    parameter_grid_copy['phases'] = phase_samples
     with open(write_dir + 'parameter_grid.pkl', 'wb') as outp:
-        pickle.dump(parameter_grid, outp)
+        pickle.dump(parameter_grid_copy, outp)
 
-def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=20, root_dir='', save=True, load=True):
-    '''
+def read_lightcurve_grid(wavelength, parameter_grid, method='equal', root_dir='', save=True, load=True):
+    ''' Reads in the nested data of MCFOST output as from the lightcurve_grid function. Outputs an ndarray, where there is a dimension for each varied parameter
+    in the parameter_grid.pkl file, and an extra dimension for the number of samples. 
     Parameters
     ----------
     wavelength : int or float, or str or dict
@@ -664,8 +679,6 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
         This parameter dictates how the time samples across orbital phase are distributed. If method=='equal', there will be n_samples equally spaced samples across 
         orbital phase 0 to 1 to construct the light curve. If method=='periastron_dense', there will be proportionally more samples around periastron (when there 
         is active dust production). If method is a j/np array, the values of the one-dimensional array will be used as the phase samples.
-    n_samples : int
-        The number of orbital phase samples with which to construct the light curve. This is only relevant if the `method` parameter is a string.
     root_dir : str
         The directory where you'd like the output of the job to be.
     save : bool
@@ -692,13 +705,18 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
         grid_array = np.load(read_dir + 'grid_array.npy')
     else:
         parameters = list(parameter_grid.keys())
+        for param in ['n_samples', 'phases']:
+            try:
+                parameters.remove(param)
+            except:
+                pass
         n_params = len(parameters)
 
         param_ranges = [parameter_grid[parameter] for parameter in parameters]
         iterations = [range(len(parameter_grid[parameter])) for parameter in parameters]
         param_dimensions = [len(parameter_grid[parameter]) for parameter in parameters]
 
-        dimensions = param_dimensions.copy() + [n_samples]
+        dimensions = param_dimensions.copy() + [parameter_grid['n_samples']]
         grid_array = np.zeros(tuple(dimensions))
 
         # the directory search in this loop needs to be the same as the one in lightcurve_grid()
@@ -711,7 +729,7 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', n_samples=2
                 prefix = '-' if i != 0 else '' 
                 current_dir += prefix + str(parameters[i]) + '_' + str(iter_count)
 
-            for sample in range(n_samples):
+            for sample in range(parameter_grid['n_samples']):
                 # ndarray indexing with variable number of indices from https://numpy.org/devdocs/user/basics.indexing.html#dealing-with-variable-numbers-of-indices-within-programs
                 curr_index = tuple(list(iter_counts) + [sample])    
 
