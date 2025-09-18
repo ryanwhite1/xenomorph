@@ -18,6 +18,7 @@ from matplotlib.colors import LogNorm
 import jax.scipy.signal as signal
 from matplotlib import animation
 import time
+from scipy.special import lambertw
 # import emcee
 # import jaxoplanet
 # import jaxopt
@@ -1609,6 +1610,71 @@ def output_points_csv(stardata, shells, filename, n_t=1000, n_points=400):
     weights = weights[filter]
     
     np.savetxt(filename, particles, delimiter=',', newline='\n')
+
+def custom_surge_func(t, b, c, max_val, d=True, full_return=False):
+    ''' A heavily modified surge function, for use in estimating the dust mass and/or grain size distribution in a shell over time. 
+    
+    Parameters
+    ----------
+    b : float
+        A parameter broadly related to the fall-off of the exponential term in the surge function.
+    c : float
+        A parameter broadly related to the long-term limit of the surge function.
+    d : bool or float
+        A parameter broadly related to the location of the surge function peak in time.
+        If True, the value of d will be automatically calculated so that the surge function intersects (0, 0) -- this is useful for dust mass in particular, since at t=0 dust mass *should* be zero.
+        If False, d will be set to 0. Else, d will retain its custom value.
+    full_return : bool
+        If True, several metrics of interest of this particular surge function will be output (see returns).
+    Returns
+    -------
+    If full_return == False:
+        func_val : float
+            The value of the surge function given the input parameters. 
+    If full_return == True:
+        func_val : float
+            The value of the surge function given the input parameters.
+        limit_val : float
+            The value of the surge function as t->inf.
+        max_time : float
+            The value of time (in units of orbital periods) that corresponds to the maximum of the surge function.
+        use_d : float
+            The value of the calculated (if d=True, or input otherwise) value of d. 
+    '''
+    if type(d) == bool:
+        if d == True:
+            use_d = np.real(lambertw(c))
+        else:
+            use_d = 0
+    else:
+        use_d = d 
+    
+    # calculate the value of the surge function
+    func_val = max_val * (((t - use_d) * np.exp(-(b * t - use_d)) + c) / (np.exp(-(b * use_d - use_d + 1)) / b + c))
+    
+    if not full_return:
+        return func_val
+    else:
+        limit_val = max_val * (c / (np.exp(-(b * use_d - use_d + 1))/b + c))   # limiting value of the surge function as t->inf
+        max_time = use_d + 1 / b        # the time of the surge function peak (units of orbital periods)
+        return func_val, limit_val, max_time, use_d
+
+
+
+def point_cloud_dust_mass(stardata, shells, n_t=1000, n_points=400):
+    '''
+    Parameters
+    ----------
+    stardata : dict
+        The system parameter file.
+    shells : int
+        The number of shells to generate
+    n_t : int
+        The number of rings to generate in each shell
+    n_points : int
+        The number of points to generate in each ring
+    '''
+    pass
 
 # print(ring_velocities(wrb.apep_aniso.copy(), 1, 400))
 
