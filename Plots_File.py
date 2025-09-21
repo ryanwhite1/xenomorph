@@ -1967,6 +1967,40 @@ def apep_orbit():
     ax.scatter(-positions2[0], positions2[1], c='k')
 
     fig.savefig('Images/apep_orbit.png', dpi=400, bbox_inches='tight')
+    
+def velocity_slice(system=wrb.WR140.copy(), shells=10, bins=12):
+    '''
+    '''
+    velocity_structure, particles = gm.radial_velocity_points(system, shells=shells, bins=bins, n_t=1000, n_points=400)
+    velocity_cube, xedges, yedges = gm.radial_velocity_cube(system, velocity_structure, particles, resolution=600)
+    
+    fig, axes = plt.subplots(ncols=4, nrows=3, figsize=(12, 9))
+
+    for i in range(3):  # for each row...
+        for j in range(4):  # for each column...
+            bin_no = 4*i+j   # keeps count of our increasing slice number accounting for the grid position
+            axes[i, j].pcolormesh(-xedges, yedges, velocity_cube[:, :, bin_no], rasterized=True)         # plot the velocity slice
+            
+            # now let's add a bit of text to show the velocity range we're looking at in each bin.
+            # start by getting the upper and lower velocity bound:
+            lower = velocity_structure['bin_centres'][bin_no] - velocity_structure['bin_widths'][bin_no] / 2
+            upper = velocity_structure['bin_centres'][bin_no] + velocity_structure['bin_widths'][bin_no] / 2
+            text = fr"${lower:.0f}\leq v < {upper:.0f}$km/s"    # format the text correctly
+            # now to add the text in the top left corner
+            axes[i, j].text(-0.9 * np.min(xedges), 0.85 * np.max(yedges), text, c='w')
+            
+            axes[i, j].set(aspect='equal')
+            axes[i, j].xaxis.set_inverted(True)
+            if i == 2:
+                axes[i, j].set_xlabel('Relative RA (")')
+            if j == 0:
+                axes[i, j].set_ylabel('Relative Dec (")')
+                
+    fig.savefig('Images/Velocity_Sliced_Nebula.png', dpi=400, bbox_inches='tight')
+    fig.savefig('Images/Velocity_Sliced_Nebula.pdf', dpi=400, bbox_inches='tight')
+    
+
+
 
     
 
@@ -2013,7 +2047,9 @@ def main():
     
     # WR104_proposal_plot()
 
-    apep_orbit()
+    # apep_orbit()
+    
+    velocity_slice()
     
 
 
