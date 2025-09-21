@@ -20,6 +20,7 @@ from tqdm import tqdm
 
 import xenomorph.systems as wrb
 import xenomorph.geometry as gm
+import xenomorph.mcfost as xmc
 
 # set LaTeX font for our figures
 plt.rcParams.update({"text.usetex": True})
@@ -2023,10 +2024,55 @@ def point_dust_mass_change():
     
     fig.savefig('Images/Mass_Change.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/Mass_Change.pdf', dpi=400, bbox_inches='tight')
-
+    
+def plot_filters():
+    transmittances = np.genfromtxt('Data/infrared filters.csv', delimiter=',')
+    
+    wavelengths = transmittances[:, 0]
+    H = transmittances[:, 1] * 1.2464
+    K = transmittances[:, 2]
+    L = transmittances[:, 3]
+    M = transmittances[:, 4]
+    
+    fig, axes = plt.subplots(nrows=2, ncols=2, sharey=True, figsize=(7, 6))
+    
+    for ax in axes.ravel():
+        ax.set(ylim=(0, 1))
+    
+    axes[0, 0].plot(wavelengths, H, c='tab:blue', rasterized=True)
+    axes[0, 0].plot(list(xmc.H_band_samples.keys()), xmc.H_band_samples.values(), c='tab:purple', marker='o', rasterized=True)
+    axes[0, 0].set(xlim=(1.4, 1.85))
+    axes[0, 0].text(1.42, 0.85, 'H band')
+    
+    axes[0, 1].plot(wavelengths, K, c='tab:blue', label='Usual', rasterized=True)
+    axes[0, 1].plot(list(xmc.K_band_samples.keys()), xmc.K_band_samples.values(), c='tab:purple', marker='o', label='Approx.', rasterized=True)
+    axes[0, 1].set(xlim=(1.9, 2.55))
+    axes[0, 1].text(1.93, 0.85, 'K band')
+    axes[0, 1].legend(loc='upper left', fancybox=True, shadow=True, bbox_to_anchor=(-0.525, 1.2), ncol=2)
+    
+    axes[1, 0].plot(wavelengths, L, c='tab:blue', rasterized=True)
+    axes[1, 0].plot(list(xmc.L_band_samples.keys()), xmc.L_band_samples.values(), c='tab:purple', marker='o', rasterized=True)
+    axes[1, 0].set(xlim=(2.95, 3.95))
+    axes[1, 0].text(2.99, 0.85, 'L band')
+    
+    axes[1, 1].plot(wavelengths, M, c='tab:blue', rasterized=True)
+    axes[1, 1].plot(list(xmc.M_band_samples.keys()), xmc.M_band_samples.values(), c='tab:purple', marker='o', rasterized=True)
+    axes[1, 1].set(xlim=(4.3, 5.4))
+    axes[1, 1].text(4.34, 0.85, 'M band')
+    
+    fig.text(0.5, 0.04, r'Wavelength ($\mu$m)', ha='center')
+    fig.text(0.04, 0.5, 'Transmittance', va='center', rotation='vertical')
+    
+    fig.savefig('Images/Filter_Transmittances.png', dpi=400, bbox_inches='tight')
+    fig.savefig('Images/Filter_Transmittances.pdf', dpi=400, bbox_inches='tight')
 
     
-
+H_band_samples = {1.45 : 0.0715157, 1.5328 : 0.662124, 1.56397 : 0.652174, 1.634 : 0.687081, 1.7 : 0.637728, 1.78 : 0.05}
+for wavelength in H_band_samples:
+    H_band_samples[wavelength] *= 1.2464    # the transmittances used above are for the blocked H filter, so need to multiply all the transmittance vals
+K_band_samples = {1.9654 : 0.049453, 2.079 : 0.798509, 2.1645 : 0.803215, 2.3 : 0.766, 2.3708 : 0.75372, 2.457 : 0.016607}
+L_band_samples = {3.1309 : 0.01, 3.23 : 0.921975, 3.7037 : 0.925085, 3.751 : 0.9036, 3.89408 : 0.0108354}
+M_band_samples = {4.4484 : 0.010919, 4.6 : 0.81075, 4.708 : 0.840764, 4.8828 : 0.90181, 5.0454 : 0.79153, 5.11247 : 0.86137, 5.27426 : 0.010345}
     
 def main():
     # apep_plot('Apep_Plot')
@@ -2073,9 +2119,8 @@ def main():
     # apep_orbit()
     
     # velocity_slice()
-    
-    point_dust_mass_change()
-    
+    # point_dust_mass_change()
+    plot_filters()
 
 
 
