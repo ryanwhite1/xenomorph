@@ -1999,7 +1999,30 @@ def velocity_slice(system=wrb.WR140.copy(), shells=10, bins=12):
     fig.savefig('Images/Velocity_Sliced_Nebula.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/Velocity_Sliced_Nebula.pdf', dpi=400, bbox_inches='tight')
     
-
+def point_dust_mass_change():
+    '''
+    '''
+    times = np.linspace(-0.1, 1.5, 100)
+    
+    b = 5
+    c = 0.1
+    
+    masses, limit_val, max_time, use_d = gm.custom_surge_func(times, b, c, 1, d=True, full_return=True)
+    
+    fig, ax = plt.subplots(figsize=(6, 4))
+    
+    ax.axhline(0, c='tab:grey')
+    ax.axvline(0, c='tab:grey')
+    ax.axhline(limit_val, c='tab:red', ls='--')
+    ax.axvline(max_time, c='tab:purple', ls='--')
+    ax.plot(times, masses, rasterized=True)
+    
+    
+    ax.set(ylabel=r'Dust mass ($M_{d,\mathrm{max}}$)', xlabel=r'Time ($P_{\mathrm{orb}}$)',
+           ylim=(-0.2, 1.1), xlim=(-0.1, 1.5))
+    
+    fig.savefig('Images/Mass_Change.png', dpi=400, bbox_inches='tight')
+    fig.savefig('Images/Mass_Change.pdf', dpi=400, bbox_inches='tight')
 
 
     
@@ -2049,7 +2072,9 @@ def main():
 
     # apep_orbit()
     
-    velocity_slice()
+    # velocity_slice()
+    
+    point_dust_mass_change()
     
 
 
