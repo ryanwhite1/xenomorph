@@ -2025,6 +2025,41 @@ def point_dust_mass_change():
     fig.savefig('Images/Mass_Change.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/Mass_Change.pdf', dpi=400, bbox_inches='tight')
     
+def grain_size_exp_change(stardata=wrb.WR140.copy()):
+    
+    stardata_copy = stardata.copy()
+    stardata_copy['dust_grain_b'] = 5
+    stardata_copy['dust_grain_c'] = 0.05
+    stardata_copy['dust_grain_d'] = 0.2
+    stardata_copy['dust_grain_max_val'] = 2
+    
+    n = 100
+    phases = np.linspace(0, 1, n)
+    exponents = np.zeros(n)
+    
+    fig, ax = plt.subplots()
+    
+    plot_phases = np.append(np.append(phases - 1, phases), phases + 1)
+    
+    shell_trials = 3
+    for shells in np.arange(1, shell_trials + 1):
+        for i in range(n):
+            stardata_copy['phase'] = phases[i]
+            exponents[i] = gm.point_cloud_grain_dist_exp(stardata_copy, shells, n_t=1000)
+            
+        plot_exponents = np.append(np.append(exponents, exponents), exponents)
+        
+        label = '1 Shell' if shells == 1 else f'{shells} Shells'
+        ax.plot(plot_phases, plot_exponents, label=label, rasterized=True)
+        
+    ax.set(xlabel=r'Orbital Phase $\phi$', ylabel=r'Median Exponent $\alpha$',
+           xlim=(-0.1, 1.1))
+    ax.legend()
+    ax.grid()
+    
+    fig.savefig('Images/grain_size_exponents.png', dpi=400, bbox_inches='tight')
+    fig.savefig('Images/grain_size_exponents.pdf', dpi=400, bbox_inches='tight')
+    
 def plot_filters():
     transmittances = np.genfromtxt('Data/infrared filters.csv', delimiter=',')
     
@@ -2120,7 +2155,8 @@ def main():
     
     # velocity_slice()
     # point_dust_mass_change()
-    plot_filters()
+    grain_size_exp_change()
+    # plot_filters()
 
 
 
