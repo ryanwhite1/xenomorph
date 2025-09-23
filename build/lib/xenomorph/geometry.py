@@ -1695,7 +1695,7 @@ def point_cloud_grain_dist_exp(stardata, shells, n_t=1000):
     turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
     _ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, shells, n_t)
     
-    non_dim_ages = _ring_ages / (stardata['period'] * yr2s)
+    non_dim_ages = _ring_ages / (stardata['period'] * yr2s)     # convert the ring ages from units of seconds to orbital periods
     
     grain_size_exps = custom_surge_func(non_dim_ages, 
                                     stardata['dust_grain_b'], stardata['dust_grain_c'], stardata['dust_grain_max_val'], d=stardata['dust_grain_d'])
