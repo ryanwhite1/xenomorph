@@ -1662,7 +1662,7 @@ def custom_surge_func(t, b, c, max_val, d=True, full_return=False):
 
 
 def point_cloud_dust_mass(stardata, shells, n_t=1000, n_points=400):
-    '''
+    ''' Calculates the *dust* masses (in physical units of whatever those of stardata['dust_mass_max_val'] is) of each particle in the point cloud.
     Parameters
     ----------
     stardata : dict
@@ -1673,9 +1673,28 @@ def point_cloud_dust_mass(stardata, shells, n_t=1000, n_points=400):
         The number of rings to generate in each shell
     n_points : int
         The number of points to generate in each ring
+    Returns
+    -------
+    particle_masses : np.array (1 x shell*n_t*n_points)
+        The mass of each particle in the point cloud, with the same ordering as that output from dust_plume_custom()
     '''
     particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
-    pass
+    
+    if stardata['dust_mass_beta'] == 1:         # if beta = 1, then we want to model the evolution over time
+        turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
+        _ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, shells, n_t)
+        
+        non_dim_ages = _ring_ages / (stardata['period'] * yr2s)     # convert the ring ages from units of seconds to orbital periods
+        
+        ring_masses = custom_surge_func(non_dim_ages, 
+                                        stardata['dust_mass_b'], stardata['dust_mass_c'], stardata['dust_mass_max_val'], d=True)
+        
+        particle_masses = np.repeat(ring_masses, n_points) * weights
+    else:           # if beta != 1, then we just want to set a constant dust mass
+        particle_masses = stardata['dust_mass_max_val'] * weights
+    
+    return particle_masses
+    
 
 def point_cloud_grain_dist_exp(stardata, shells, n_t=1000):
     ''' Calculates the expected grain size distribution exponent for each ring in the point cloud and returns the median value for use across the whole nebula.
@@ -1697,12 +1716,12 @@ def point_cloud_grain_dist_exp(stardata, shells, n_t=1000):
     
     non_dim_ages = _ring_ages / (stardata['period'] * yr2s)     # convert the ring ages from units of seconds to orbital periods
     
-    grain_size_exps = custom_surge_func(non_dim_ages, 
-                                    stardata['dust_grain_b'], stardata['dust_grain_c'], stardata['dust_grain_max_val'], d=stardata['dust_grain_d'])
-    
-    median_exp =  np.median(grain_size_exps)
-    return median_exp
-    
+    if stardata['dust_grain_beta'] == 1:                # if beta = 1, then we want to model the evolution over time
+        grain_size_exps = custom_surge_func(non_dim_ages, 
+                                        stardata['dust_grain_b'], stardata['dust_grain_c'], stardata['dust_grain_max_val'], d=stardata['dust_grain_d'])
+        return np.median(grain_size_exps)
+    else:                                               # if beta != 1, then we just want to set a constant distribution exponent
+        return stardata['dust_grain_max_val']
     
 
 # print(ring_velocities(wrb.apep_aniso.copy(), 1, 400))

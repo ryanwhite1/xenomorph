@@ -1675,7 +1675,19 @@ def point_cloud_dust_mass(stardata, shells, n_t=1000, n_points=400):
         The number of points to generate in each ring
     '''
     particles, weights = dust_plume_custom(stardata, shells, n_t=n_t, n_points=n_points)
-    pass
+    
+    turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
+    _ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, shells, n_t)
+    
+    non_dim_ages = _ring_ages / (stardata['period'] * yr2s)     # convert the ring ages from units of seconds to orbital periods
+    
+    ring_masses = custom_surge_func(non_dim_ages, 
+                                    stardata['dust_mass_b'], stardata['dust_mass_c'], stardata['dust_mass_max_val'], d=True)
+    
+    particle_masses = np.repeat(ring_masses, n_points) * weights
+    
+    return particle_masses
+    
 
 def point_cloud_grain_dist_exp(stardata, shells, n_t=1000):
     ''' Calculates the expected grain size distribution exponent for each ring in the point cloud and returns the median value for use across the whole nebula.
@@ -1697,11 +1709,14 @@ def point_cloud_grain_dist_exp(stardata, shells, n_t=1000):
     
     non_dim_ages = _ring_ages / (stardata['period'] * yr2s)     # convert the ring ages from units of seconds to orbital periods
     
-    grain_size_exps = custom_surge_func(non_dim_ages, 
-                                    stardata['dust_grain_b'], stardata['dust_grain_c'], stardata['dust_grain_max_val'], d=stardata['dust_grain_d'])
+    if stardata['dust_grain_beta'] == 1:
+        grain_size_exps = custom_surge_func(non_dim_ages, 
+                                        stardata['dust_grain_b'], stardata['dust_grain_c'], stardata['dust_grain_max_val'], d=stardata['dust_grain_d'])
+        return np.median(grain_size_exps)
+    else:
+        return stardata['dust_grain_max_val']
     
-    median_exp =  np.median(grain_size_exps)
-    return median_exp
+    
     
     
 
