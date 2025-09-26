@@ -117,13 +117,19 @@ def mcfost_points(stardata, shells, filename, n_t=1000, n_points=400, resolution
     particles = jnp.tan(particles / (60 * 60 * 180 / jnp.pi)) * (stardatacopy['distance'] * 3.086e13) # convert from angular coords back to physical coords
     particles /= gm.AU2km  # MCFOST needs distances in au
 
-    # get rid of any points that have no mass
-    filter = np.where(weights > 0)[0]
-    particles = particles[:, filter]
-    weights = weights[filter]
-
+    # # get rid of any points that have no mass
+    # filter = np.where(masses > 0)[0]
+    # particles = particles[:, filter]
+    # weights = weights[filter]
+    
     # assign masses to each point
-    masses = 1e2 * stardata['dust_mass'] * shells * weights / jnp.sum(weights)     # the 1e2 factor assumes a 1:100 dust:gas mass ratio, and these are actually the gas masses
+    # masses = 1e2 * stardata['dust_mass'] * shells * weights / jnp.sum(weights)     # the 1e2 factor assumes a 1:100 dust:gas mass ratio, and these are actually the gas masses
+    masses = 1e2 * gm.point_cloud_dust_mass(stardata, shells, n_t=n_t, n_points=n_points)   # the 1e2 factor assumes a 1:100 dust:gas mass ratio, and these are actually the gas masses
+
+    # get rid of any points that have no mass
+    filter = np.where(masses > 0)[0]
+    masses = masses[filter]
+    particles = particles[:, filter]
 
     fits_masses = fits.PrimaryHDU(masses)
     fits_positions = fits.ImageHDU(particles.T)     # transposed to get the orientation right (although it doesnt affect the calc at all)
@@ -134,7 +140,7 @@ def mcfost_points(stardata, shells, filename, n_t=1000, n_points=400, resolution
 
 
 
-def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, resolution=600, gas_2_dust=100, root_dir=''):
+def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, resolution=600, gas_2_dust=100, root_dir='', shells=1, n_t=1000):
     '''WIP -- Generates a .para file to be used in the MCFOST run. 
     Note:
      - The dust mass *must* be set at run time (through the density_file provided)
@@ -161,6 +167,10 @@ def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, 
         The mass of gas relative to the dust in each particle
     root_dir : str
         The directory where you'd like the output of the job to be.
+    shells : int
+        The number of shells to generate.
+    n_t : int
+        The number of rings to generate in each shell.
     '''
     if root_dir != '':
         write_dir = f'{root_dir}/'
@@ -171,6 +181,8 @@ def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, 
     particles = data[1].data
     particles = np.abs(particles)
     img_bound = 1.05 * 2 * np.max(particles[:, :2]) # want it slightly bigger than twice the radius from the origin, in the projection of the sky (hence the :2 slice)
+    
+    aexp = gm.point_cloud_grain_dist_exp(stardata, shells, n_t=1000)
 
     parafile = io.open(f'{write_dir + paraname}.para', 'w', newline='\n')
 
@@ -207,7 +219,7 @@ def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, 
                     "  F  1e-5		  viscous heating, alpha_viscosity\n\n"+\
                     "#Number of zones : 1 zone = 1 density structure + corresponding grain properties\n"+\
                     "  1                       needs to be 1 if you read a density file (phantom or fits file)\n\n")
-    # in the below block, the dust mass is given from the density_file, so we only specify the gas-to-dust mass ratio
+    # in the below block, the true dust mass is given from the density_file, so we only specify the gas-to-dust mass ratio
     parafile.write("#Density structure\n"+\
                     "  3                       zone type : 1 = disk, 2 = tappered-edge disk, 3 = envelope, 4 = debris disk, 5 = wall\n"+\
                     f"  1.e-15    {gas_2_dust:.1f}		  dust mass,  gas-to-dust mass ratio\n"+\
@@ -220,7 +232,7 @@ def generate_para(stardata, paraname, density_file, photons=1e7, T_photons=1e7, 
                     "  Mie  1 2  0.2  1.0  0.9 Grain type (Mie or DHS), N_components, mixing rule (1 = EMT or 2 = coating),  porosity, mass fraction, Vmax (for DHS)\n"+\
                     "  ac_opct.dat  1.0  Optical indices file, volume fraction\n"+\
                     "  1	                  Heating method : 1 = RE + LTE, 2 = RE + NLTE, 3 = NRE\n"+\
-                    f"  {stardata['amin']}  {stardata['amax']} {stardata['aexp']:.1f} 100 	  amin, amax [mum], aexp, n_grains (log distribution)\n\n")
+                    f"  {stardata['amin']}  {stardata['amax']} {aexp:.2f} 100 	  amin, amax [mum], aexp, n_grains (log distribution)\n\n")
     parafile.write("#Molecular RT settings\n"+\
                     "  T T T                   lpop, laccurate_pop, LTE\n"+\
                     "  0.05 km/s		  Turbulence velocity, unit km/s or cs\n"+\
@@ -327,9 +339,9 @@ def generate_slurm(slurmname, wavelength, para_file, density_file, cpus=4, run_h
     if type(wavelength) == str or type(wavelength) == dict:
         wavelengths = list(bandpasses[wavelength].keys()) if type(wavelength) == str else list(wavelength.keys())
         for sample_lambda in wavelengths:
-            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {sample_lambda}')
+            mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {sample_lambda}\n')
     else:
-        mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}')
+        mcfost_lines.append(f'mcfost {para_file} -df {density_file} -fix_star -star_bb -img {wavelength}\n')
 
     slurmfile = io.open(f'{write_dir + slurmname}.q', 'w', newline='\n')
 
@@ -426,7 +438,7 @@ def generate_lightcurve(stardata, wavelength, method='equal', n_samples=20, shel
 
         # now create the para files (doing them seperately for now in case we want to change grain size params later on)
         generate_para(stardata_sample, 'systempara', 'densityfile.fits', photons=photons, T_photons=T_photons, resolution=resolution, 
-                        gas_2_dust=gas_2_dust, root_dir=phase_dir)
+                        gas_2_dust=gas_2_dust, root_dir=phase_dir, shells=shells, n_t=n_t)
     
         # now finally generate all of the necessary slurm scripts
         generate_slurm(f'sample_{i}', wavelength, 'systempara.para', 'densityfile.fits', cpus=cpus, run_hours=run_hours, memory=memory, root_dir=phase_dir, 

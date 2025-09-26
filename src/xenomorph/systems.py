@@ -43,8 +43,9 @@ template_system = {"m1":22.,                    # body 1 mass (solar masses)
         'star3amp':0., 'star3sd':-1., 'star3dist':0.,                                   # assuming a third star in the system, these are imaging properties of it. star3dist is the radial distance of the 3rd star from the binary barycentre (au)
         'star1lum':5.97, 'star1temp':57000, 'star2lum':5.699, 'star2temp':36000,        # for use in MCFOST: the luminosity (log10 solar lumins) and temperature (K) of each star in the binary
         'star3lum':0, 'star3temp':0,                                                    # as above, but for a third star (if there is one, i.e. if star3dist != 0)
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,                                           # for use in MCFOST: minimum and maximum dust grain size (micron) and dust grain size distribution power law exponent    
-        'dust_mass':1e-8}                                                               # shell dust mass (solar masses) This assumes MCFOST is using a 1:100 dust:gas mass ratio, so the actual mass will be multiplied by 100. That is, the user-entered mass here is just for the dust.                                                 
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  # for use in MCFOST: minimum and maximum dust grain size (micron) and and whether or not to simulate dust grain size evolution   
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,              # for use in MCFOST: the dust grain evolution parameters for the surge function. 
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1e-10}              # for use in MCFOST: the shell dust mass max_val (solar masses) is for *each point* in the point cloud. This assumes MCFOST is using a 1:100 dust:gas mass ratio, so the actual mass will be multiplied by 100. That is, the user-entered mass here is just for the dust.                                                 
 '''Template System'''
 
 # below are rough params for Apep 
@@ -75,8 +76,9 @@ apep = {"m1":15.,                # solar masses
         "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0.7, 'star1sd':-0.7, 'star2amp':0.7, 'star2sd':-0.7, 'star3amp':0.7, 'star3sd':-1.12, 'star3dist':1700.,
         'star1lum':5.34, 'star1temp':70000, 'star2lum':5.3, 'star2temp':85000, 'star3lum':5.9, 'star3temp':28000,
-        'amin':0.001, 'amax':0.5, 'aexp':3.5,
-        'dust_mass':1e-5}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':4e-11}
 '''Apep'''
 def apep_refs():
         for ref in ["White et al. 2025 - in prep.", "Han et al. 2025 - in prep", "Han et al. 2020 - 2020MNRAS.498.5604H", 
@@ -111,8 +113,9 @@ WR48a = {"m1":15.,                  # solar masses
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
         'star1lum':5.5, 'star1temp':40000, 'star2lum':5.5, 'star2temp':20000,
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,
-        'dust_mass':1e-8}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':5e-11}
 '''WR48a'''
 # WR48a2 = {"m1":15.,                  # solar masses
 #         "m2":10.,                   # solar masses
@@ -169,8 +172,9 @@ WR104 = {"m1":10.,                # solar masses
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
         'star1lum':5.5, 'star1temp':45000, 'star2lum':5, 'star2temp':20000,
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,
-        'dust_mass':1e-8}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1e-13}
 '''WR104'''
 # below are rough params for WR 112
 WR112 = {"m1":15.,                # solar masses
@@ -200,8 +204,9 @@ WR112 = {"m1":15.,                # solar masses
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
         'star1lum':5.5, 'star1temp':45000, 'star2lum':5, 'star2temp':20000,
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,
-        'dust_mass':1e-8}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1e-13}
 '''WR112'''
 def WR112_refs():
         ''''''
@@ -236,8 +241,9 @@ WR125 = {"m1":15.,                # solar masses
         "windspeed_polar":2400, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
         'star1lum':5.5, 'star1temp':45000, 'star2lum':5, 'star2temp':20000,
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,
-        'dust_mass':1e-8}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1e-13}
 '''WR125'''
 
 # below are rough params for WR 137
@@ -268,8 +274,9 @@ WR137 = {"m1":10.,                # solar masses
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
         'star1lum':5.6, 'star1temp':60000, 'star2lum':5.2, 'star2temp':32000,
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,
-        'dust_mass':1e-8}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1e-13}
 '''WR137'''
 def WR137_refs():
         ''''''
@@ -302,8 +309,9 @@ WR137alt = {'m1': 9.5,
         'windspeed_polar': 1700.0, 'aniso_vel_mult': -6.30, 'aniso_vel_power': 1.99, 'open_angle_polar': 0.0, 'aniso_OA_mult': -5.30, 'aniso_OA_power': 3.53, 
         'star1amp': 1.0, 'star1sd': -0.588, 'star2amp': 2.520, 'star2sd': -3.0, 'star3amp': 0.0, 'star3sd': -1.0, 'star3dist': 0.0,
         'star1lum':5.6, 'star1temp':60000, 'star2lum':5.2, 'star2temp':32000,
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,
-        'dust_mass':1e-8}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1e-13}
 
 # below are rough params for WR 140
 WR140 = {"m1":8.4,                # solar masses
@@ -333,8 +341,9 @@ WR140 = {"m1":8.4,                # solar masses
         "windspeed_polar":240.0, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
         'star1lum':5.97, 'star1temp':57000, 'star2lum':5.699, 'star2temp':36000,
-        'amin':0.001, 'amax':0.5, 'aexp':0.0,
-        'dust_mass':4e-8}
+        'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1e-13}
 '''WR140'''
 def WR140_refs():
         ''''''
