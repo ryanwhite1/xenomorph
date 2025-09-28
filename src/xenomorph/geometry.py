@@ -1684,7 +1684,7 @@ def point_cloud_dust_mass(stardata, shells, n_t=1000, n_points=400):
         turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
         _ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, shells, n_t)
         
-        non_dim_ages = _ring_ages / (stardata['period'] * yr2s)     # convert the ring ages from units of seconds to orbital periods
+        non_dim_ages = _ring_ages / yr2s     # convert the ring ages from units of seconds to years
         
         ring_masses = custom_surge_func(non_dim_ages, 
                                         stardata['dust_mass_b'], stardata['dust_mass_c'], stardata['dust_mass_max_val'], d=True)
@@ -1714,7 +1714,7 @@ def point_cloud_grain_dist_exp(stardata, shells, n_t=1000):
     turn_on_mean_anom, turn_off_mean_anom = episodic_mean_anomaly(stardata)
     _ring_ages = ring_ages(stardata, turn_on_mean_anom, turn_off_mean_anom, shells, n_t)
     
-    non_dim_ages = _ring_ages / (stardata['period'] * yr2s)     # convert the ring ages from units of seconds to orbital periods
+    non_dim_ages = _ring_ages / yr2s     # convert the ring ages from units of seconds to years
     
     if stardata['dust_grain_beta'] == 1:                # if beta = 1, then we want to model the evolution over time
         grain_size_exps = custom_surge_func(non_dim_ages, 

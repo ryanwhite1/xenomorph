@@ -524,13 +524,18 @@ def integrate_flux(wavelength, folder):
 def lightcurve_plot(folder, wavelength, phases='equal'):
     '''
     Some help gotten from https://stackoverflow.com/questions/973473/getting-a-list-of-all-subdirectories-in-the-current-directory
-    Todo:
-        - account for custom phase samples
+
     Parameters:
     -----------
     folder : str
-    wavelength : 
+    wavelength : int or float, or str or dict
+        The wavelength (in microns) that you'd like to generate the image for.
+        If wavelength is a str type, it will be interpreted as one of the pre-defined filters {'H', 'K', 'L', 'M'} and representative samples will be generated from that filter.
+        If wavelength is a dict, it will be as for the str case, but for user-defined wavelengths.
     phases : str or j/np.array
+        This parameter dictates how the time samples across orbital phase are distributed. If phases=='equal', there will be n_samples equally spaced samples across 
+        orbital phase 0 to 1 to construct the light curve. If phases=='periastron_dense', there will be proportionally more samples around periastron (when there 
+        is active dust production). If phases is a j/np array, the values of the one-dimensional array will be used as the phase samples.
     '''
     subdirectories = [f.name for f in os.scandir(folder) if f.is_dir()]
     n_samples = len(subdirectories)
@@ -667,7 +672,7 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', shells
     bashscript.close()
 
     if type(method) == str:
-        phase_samples = sample_phases(method, n_samples)
+        phase_samples = sample_phases(method, parameter_grid['n_samples'])
     else:
         phase_samples = method.copy()
     parameter_grid_copy = parameter_grid.copy()

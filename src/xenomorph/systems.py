@@ -112,11 +112,14 @@ WR48a = {"m1":15.,                  # solar masses
         "spin_inc":0., "spin_Omega":0., 
         "windspeed_polar":2400., "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
         'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
-        'star1lum':5.5, 'star1temp':40000, 'star2lum':5.5, 'star2temp':20000,
+        'star1lum':5.5, 'star1temp':70000, 'star2lum':5.8, 'star2temp':25000,
         'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
         'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
-        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':5e-11}
+        'dust_mass_beta':1, 'dust_mass_b':100, 'dust_mass_c':0.016, 'dust_mass_max_val':5e-9}
 '''WR48a'''
+def WR48a_refs():
+        for ref in ["Williams 2012 - 2012MNRAS.420.2526W", "Zhekov 2014 - 2014MNRAS.445.1663Z"]:
+                print(ref)
 # WR48a2 = {"m1":15.,                  # solar masses
 #         "m2":10.,                   # solar masses
 #         "eccentricity":0.7, 
