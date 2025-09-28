@@ -559,7 +559,7 @@ def lightcurve_plot(folder, wavelength, phases='equal'):
     fig.savefig(folder+'/lightcurve.png', dpi=400, bbox_inches='tight')
 
     if type(wavelength) == str:
-        mags = -2.512 * np.log10(fluxes) + 2.512 * np.log10(zero_points[wavelength])
+        mags = -2.5 * np.log10(fluxes) + 2.5 * np.log10(zero_points[wavelength])
         fig, ax = plt.subplots()
         if n_samples >= 30:
             ax.plot(phases, mags)
