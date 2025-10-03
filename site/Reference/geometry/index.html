@@ -658,6 +658,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#xenomorph.geometry.output_points_csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      output_points_csv
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#xenomorph.geometry.plot_3d" class="md-nav__link">
     <span class="md-ellipsis">
       plot_3d
@@ -1096,6 +1105,15 @@
   <a href="#xenomorph.geometry.output_points" class="md-nav__link">
     <span class="md-ellipsis">
       output_points
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#xenomorph.geometry.output_points_csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      output_points_csv
     </span>
   </a>
   
@@ -4507,6 +4525,173 @@ and 'term_windspeed' (float; the final windspeed of the plume at t-&gt;inf) are 
     <span class="n">output</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">weights</span>
 
     <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="xenomorph.geometry.output_points_csv" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">output_points_csv</span><span class="p">(</span><span class="n">stardata</span><span class="p">,</span> <span class="n">shells</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">n_t</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Saves a (4 x ~shells<em>n_t</em>n_points) file in .npy format, where the first 3 axes are the x-y-z spatial coordinates of the points (in AU) 
+    relative to the system CoM, and the 4th axis are the weights of each point. </p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>stardata</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The system parameter file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>shells</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of shells to generate</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the file to save the points into. A '.npy' extension will automatically be added to the end.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_t</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of rings to generate in each shell</p>
+              </div>
+            </td>
+            <td>
+                  <code>1000</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_points</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of points to generate in each ring</p>
+              </div>
+            </td>
+            <td>
+                  <code>400</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>xenomorph\geometry.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1587</span>
+<span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
+<span class="normal">1591</span>
+<span class="normal">1592</span>
+<span class="normal">1593</span>
+<span class="normal">1594</span>
+<span class="normal">1595</span>
+<span class="normal">1596</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span>
+<span class="normal">1600</span>
+<span class="normal">1601</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output_points_csv</span><span class="p">(</span><span class="n">stardata</span><span class="p">,</span> <span class="n">shells</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">n_t</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39; Saves a (4 x ~shells*n_t*n_points) file in .npy format, where the first 3 axes are the x-y-z spatial coordinates of the points (in AU) </span>
+<span class="sd">        relative to the system CoM, and the 4th axis are the weights of each point. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    stardata : dict</span>
+<span class="sd">        The system parameter file.</span>
+<span class="sd">    shells : int</span>
+<span class="sd">        The number of shells to generate</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        The name of the file to save the points into. A &#39;.npy&#39; extension will automatically be added to the end.</span>
+<span class="sd">    n_t : int</span>
+<span class="sd">        The number of rings to generate in each shell</span>
+<span class="sd">    n_points : int</span>
+<span class="sd">        The number of points to generate in each ring</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">particles</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">dust_plume_custom</span><span class="p">(</span><span class="n">stardata</span><span class="p">,</span> <span class="n">shells</span><span class="p">,</span> <span class="n">n_t</span><span class="o">=</span><span class="n">n_t</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="n">n_points</span><span class="p">)</span>
+
+    <span class="nb">filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">weights</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">particles</span> <span class="o">=</span> <span class="n">particles</span><span class="p">[:,</span> <span class="nb">filter</span><span class="p">]</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="nb">filter</span><span class="p">]</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">particles</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
