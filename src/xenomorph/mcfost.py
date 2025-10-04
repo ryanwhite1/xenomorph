@@ -680,7 +680,7 @@ def lightcurve_grid(stardata, wavelength, parameter_grid, method='equal', shells
     with open(write_dir + 'parameter_grid.pkl', 'wb') as outp:
         pickle.dump(parameter_grid_copy, outp)
 
-def read_lightcurve_grid(wavelength, parameter_grid, method='equal', root_dir='', save=True, load=True):
+def read_lightcurve_grid(wavelength, parameter_grid, method='equal', root_dir='', save=True, load=True, ignore_errs=True):
     ''' Reads in the nested data of MCFOST output as from the lightcurve_grid function. Outputs an ndarray, where there is a dimension for each varied parameter
     in the parameter_grid.pkl file, and an extra dimension for the number of samples. 
     Parameters
@@ -704,6 +704,9 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', root_dir=''
     load : bool
         If True, checks if there is an existing and saved grid array, and loads it if so. 
         If False, the function will recompute the grid array.
+    ignore_errs : bool
+        If True, we'll ignore that some of the runs in the grid may have failed due to segfaults, and we'll continue reading the grid.
+        If False, we'll break if an error is encountered (probably due to a run not completing due to a segfault)
     Returns
     -------
     grid_array : np.array of dimension (len(parameter_grid.keys()) x n_samples)
@@ -750,12 +753,15 @@ def read_lightcurve_grid(wavelength, parameter_grid, method='equal', root_dir=''
                 # ndarray indexing with variable number of indices from https://numpy.org/devdocs/user/basics.indexing.html#dealing-with-variable-numbers-of-indices-within-programs
                 curr_index = tuple(list(iter_counts) + [sample])    
 
-                try:
+                if ignore_errs:
+                    try:
+                        curr_flux = integrate_flux(wavelength, read_dir + current_dir + f'/sample_{sample}/')
+                        grid_array[curr_index] = curr_flux
+                    except:
+                        continue
+                else:
                     curr_flux = integrate_flux(wavelength, read_dir + current_dir + f'/sample_{sample}/')
                     grid_array[curr_index] = curr_flux
-                except:
-                    continue
-        
         if save:
             np.save(read_dir + 'grid_array.npy', grid_array)
         

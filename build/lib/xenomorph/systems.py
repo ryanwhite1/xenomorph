@@ -78,7 +78,7 @@ apep = {"m1":15.,                # solar masses
         'star1lum':5.34, 'star1temp':70000, 'star2lum':5.3, 'star2temp':85000, 'star3lum':5.9, 'star3temp':28000,
         'amin':0.001, 'amax':0.5, 'dust_grain_beta':1,                                  
         'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':2, 'dust_grain_d':0.2,
-        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':4e-11}
+        'dust_mass_beta':1, 'dust_mass_b':5, 'dust_mass_c':0.1, 'dust_mass_max_val':1.1e-10}
 '''Apep'''
 def apep_refs():
         for ref in ["White et al. 2025 - in prep.", "Han et al. 2025 - in prep", "Han et al. 2020 - 2020MNRAS.498.5604H", 
