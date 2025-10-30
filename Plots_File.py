@@ -1999,6 +1999,58 @@ def velocity_slice(system=wrb.WR140.copy(), shells=10, bins=12):
                 
     fig.savefig('Images/Velocity_Sliced_Nebula.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/Velocity_Sliced_Nebula.pdf', dpi=400, bbox_inches='tight')
+
+def velocity_slice_diverging(system=wrb.WR140.copy(), shells=10, bins=12):
+    '''
+    '''
+    from matplotlib.patches import Rectangle, Patch
+    import matplotlib as mpl
+
+    velocity_structure, particles = gm.radial_velocity_points(system, shells=shells, bins=bins, n_t=100, n_points=40)
+    velocity_cube, xedges, yedges = gm.radial_velocity_cube(system, velocity_structure, particles, resolution=100)
+
+    vmax, vmin = np.max(velocity_cube), np.min(velocity_cube)
+
+    base = mpl.colormaps['bwr']
+    colour_list = base(np.linspace(0, 1, bins))
+    
+    fig, axes = plt.subplots(ncols=4, nrows=3, figsize=(12, 9))
+
+    
+    for i in range(3):  # for each row...
+        for j in range(4):  # for each column...
+            print(i, j)
+            bin_no = 4*i+j   # keeps count of our increasing slice number accounting for the grid position
+            axes[i, j].set_facecolor('k')
+            # axes[i, j].pcolormesh(-xedges, yedges, velocity_cube[:, :, bin_no], rasterized=True,
+            #                       cmap='bwr', vmin=vmin, vmax=vmax)         # plot the velocity slice
+            _, _, alphas = smooth_histogram2d_w_bins(velocity_cube[:, :, bin_no], np.ones(len(velocity_cube[0, :, bin_no])), system, xedges, yedges)
+            alphas = np.array(alphas)
+            alphas = np.maximum(alphas, 0)
+            for ii in range(len(xedges) - 1):
+                for jj in range(len(yedges) - 1):
+                    rect = Rectangle((xedges[ii], yedges[jj]), xedges[ii + 1] - xedges[ii], yedges[jj + 1] - yedges[jj],
+                                    facecolor=colour_list[bin_no], alpha=alphas[ii, jj], edgecolor='none')
+                    axes[i, j].add_patch(rect)
+            
+            # now let's add a bit of text to show the velocity range we're looking at in each bin.
+            # start by getting the upper and lower velocity bound:
+            lower = velocity_structure['bin_centres'][bin_no] - velocity_structure['bin_widths'][bin_no] / 2
+            upper = velocity_structure['bin_centres'][bin_no] + velocity_structure['bin_widths'][bin_no] / 2
+            text = fr"${lower:.0f}\leq v < {upper:.0f}$km/s"    # format the text correctly
+            # now to add the text in the top left corner
+            axes[i, j].text(-0.9 * np.min(xedges), 0.85 * np.max(yedges), text, c='w')
+            
+            axes[i, j].set(aspect='equal')
+            axes[i, j].xaxis.set_inverted(True)
+            if i == 2:
+                axes[i, j].set_xlabel('Relative RA (")')
+            if j == 0:
+                axes[i, j].set_ylabel('Relative Dec (")')
+            
+                
+    fig.savefig('Images/Velocity_Sliced_Nebula_div.png', dpi=400, bbox_inches='tight')
+    fig.savefig('Images/Velocity_Sliced_Nebula_div.pdf', dpi=400, bbox_inches='tight')
     
 def point_dust_mass_change():
     '''
@@ -2154,8 +2206,9 @@ def main():
     # apep_orbit()
     
     # velocity_slice()
+    velocity_slice_diverging()
     # point_dust_mass_change()
-    grain_size_exp_change()
+    # grain_size_exp_change()
     # plot_filters()
 
 
