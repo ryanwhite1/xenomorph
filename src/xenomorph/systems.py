@@ -354,3 +354,66 @@ def WR140_refs():
                 print(ref)
 
 
+# test params to make a light curve with 
+WR140_lc = {"m1":8.4,                # solar masses
+        "m2":20.,                # solar masses
+        "eccentricity":0.8964, 
+        "inclination":119.6,       # degrees
+        "asc_node":275.,         # degrees
+        "arg_peri":180.-46.8,           # degrees
+        "open_angle":80.,       # degrees (full opening angle)
+        "period":2896.35/365.25,           # years
+        "distance":1670.,        # pc
+        "windspeed1":2600.,       # km/s
+        "windspeed2":2400.,      # km/s
+        "turn_on":-135.,         # true anomaly (degrees)
+        "turn_off":135.,         # true anomaly (degrees)
+        "gradual_turn":0.5,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
+        "oblate":0.,
+        "nuc_dist":50., "opt_thin_dist":220.,           # nucleation and optically thin distance (AU)
+        'term_windspeed':2600., 'accel_rate':-5.,
+        "orb_sd":80., "orb_amp":0., "orb_min":180., "az_sd":60., "az_amp":0., "az_min":90.,
+        "comp_incl":0., "comp_az":0., "comp_open":0., "comp_reduction":0., "comp_plume":0.,
+        "comp_plume_sd":0., "comp_plume_max":0.,
+        "phase":0.6, 
+        "sigma":2.,              # sigma for gaussian blur
+        "histmax":1., "lum_power":1., 
+        "spin_inc":0., "spin_Omega":0.,
+        "windspeed_polar":240.0, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
+        'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
+        'star1lum':5.5, 'star1temp':57000, 'star2lum':5.4, 'star2temp':36000,
+        'amin':0.01, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':4.5, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':3, 'dust_mass_c':2., 'dust_mass_max_val':1e-13}
+
+# test params to make a light curve with 
+WR140_lc2 = {"m1":8.4,                # solar masses
+        "m2":20.,                # solar masses
+        "eccentricity":0.8964, 
+        "inclination":119.6,       # degrees
+        "asc_node":275.,         # degrees
+        "arg_peri":180.-46.8,           # degrees
+        "open_angle":80.,       # degrees (full opening angle)
+        "period":2896.35/365.25,           # years
+        "distance":1670.,        # pc
+        "windspeed1":2600.,       # km/s
+        "windspeed2":2400.,      # km/s
+        "turn_on":-135.,         # true anomaly (degrees)
+        "turn_off":135.,         # true anomaly (degrees)
+        "gradual_turn":0.5,       # gradual turn off/on (deg) -- standard deviation of gaussian fall off
+        "oblate":0.,
+        "nuc_dist":50., "opt_thin_dist":220.,           # nucleation and optically thin distance (AU)
+        'term_windspeed':2600., 'accel_rate':-5.,
+        "orb_sd":80., "orb_amp":0., "orb_min":180., "az_sd":60., "az_amp":0., "az_min":90.,
+        "comp_incl":0., "comp_az":0., "comp_open":0., "comp_reduction":0., "comp_plume":0.,
+        "comp_plume_sd":0., "comp_plume_max":0.,
+        "phase":0.6, 
+        "sigma":2.,              # sigma for gaussian blur
+        "histmax":1., "lum_power":1., 
+        "spin_inc":0., "spin_Omega":0.,
+        "windspeed_polar":240.0, "aniso_vel_mult":-6.2, "aniso_vel_power":3.53, "open_angle_polar":180., "aniso_OA_mult":-6.05, "aniso_OA_power":3.53,
+        'star1amp':0., 'star1sd':-1., 'star2amp':0., 'star2sd':-1., 'star3amp':0., 'star3sd':-1., 'star3dist':0.,
+        'star1lum':5.5, 'star1temp':57000, 'star2lum':5.4, 'star2temp':36000,
+        'amin':0.01, 'amax':0.5, 'dust_grain_beta':1,                                  
+        'dust_grain_b':5, 'dust_grain_c':0.05, 'dust_grain_max_val':3, 'dust_grain_d':0.2,
+        'dust_mass_beta':1, 'dust_mass_b':3, 'dust_mass_c':2., 'dust_mass_max_val':1e-13}

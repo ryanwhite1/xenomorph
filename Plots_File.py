@@ -2112,6 +2112,67 @@ def grain_size_exp_change(stardata=wrb.WR140.copy()):
     fig.savefig('Images/grain_size_exponents.png', dpi=400, bbox_inches='tight')
     fig.savefig('Images/grain_size_exponents.pdf', dpi=400, bbox_inches='tight')
     
+def WR140_rt_lightcurve(folder, phases, shift=0, fileappend=''):
+    '''
+    '''
+    import os 
+    from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+    
+    wavelength = 'L'
+    
+    subdirectories = [f.name for f in os.scandir(folder) if f.is_dir()]
+    n_samples = len(subdirectories)
+    sample_nums = [int(subdirectory[7:]) for subdirectory in subdirectories]
+
+    if type(phases) == str:
+        phases = xmc.sample_phases(phases, n_samples)
+        
+    fluxes = np.zeros(n_samples)
+
+    for i in range(n_samples):
+        current_dir = folder + f'/sample_{i}/'
+        fluxes[i] = xmc.integrate_flux(3.5, current_dir)
+    
+    phases = np.append(np.append(phases - 1, phases), phases + 1)
+    fluxes = np.tile(fluxes, 3)
+    
+    mags = -2.5 * np.log10(fluxes) + 2.5 * np.log10(xmc.zero_points[wavelength])
+    
+    fig, axes = plt.subplots(figsize=(8, 6), nrows=2, sharex=True, height_ratios=[0.8, 0.2], gridspec_kw={'hspace':0})
+    
+    axes[0].plot(phases, mags + shift, rasterized=True)
+    
+    photometry = np.genfromtxt('Data/Photometry/WR140.txt', skip_header=257, skip_footer=67)
+    photo_phases, photo_mags = photometry[:, 0], photometry[:, 1]
+    
+    photo_phases = np.append(np.append(photo_phases - 1, photo_phases), photo_phases + 1)
+    photo_mags = np.tile(photo_mags, 3)
+    
+    data_phase_shift = -0.03
+    
+    axes[0].scatter((photo_phases + data_phase_shift), photo_mags, c='tab:red', s=10, rasterized=True)
+    
+    interp_lc = np.interp((photo_phases + data_phase_shift), phases, mags+shift)
+    
+    axes[1].scatter(photo_phases + data_phase_shift, interp_lc - photo_mags, s=10, rasterized=True)
+    axes[1].axhline(0, c='tab:grey', ls='--')
+    
+    axes[0].set(ylabel='Magnitude', xlim=(-0.05, 1.05))
+    axes[1].set(xlabel='Phase', ylabel='Residual', ylim=(-1.2, 1))
+    axes[0].invert_yaxis()
+    axes[1].invert_yaxis()
+    
+    axes[1].xaxis.set_minor_locator(AutoMinorLocator())
+
+    axes[0].grid(True)
+    
+    fig.savefig(f'Images/MRes_Plots/WR140_lightcurve{fileappend}.png', dpi=400, bbox_inches='tight')
+    fig.savefig(f'Images/MRes_Plots/WR140_lightcurve{fileappend}.pdf', dpi=400, bbox_inches='tight')
+
+    
+    
+    
+    
 def plot_filters():
     transmittances = np.genfromtxt('Data/infrared filters.csv', delimiter=',')
     
@@ -2206,10 +2267,12 @@ def main():
     # apep_orbit()
     
     # velocity_slice()
-    velocity_slice_diverging()
+    # velocity_slice_diverging()
     # point_dust_mass_change()
     # grain_size_exp_change()
     # plot_filters()
+    
+    WR140_rt_lightcurve('rad_transfer/WR140/3.5_7', 'periastron_dense', shift=0, fileappend='_test7')
 
 
 
