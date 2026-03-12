@@ -2221,6 +2221,123 @@ for wavelength in H_band_samples:
 K_band_samples = {1.9654 : 0.049453, 2.079 : 0.798509, 2.1645 : 0.803215, 2.3 : 0.766, 2.3708 : 0.75372, 2.457 : 0.016607}
 L_band_samples = {3.1309 : 0.01, 3.23 : 0.921975, 3.7037 : 0.925085, 3.751 : 0.9036, 3.89408 : 0.0108354}
 M_band_samples = {4.4484 : 0.010919, 4.6 : 0.81075, 4.708 : 0.840764, 4.8828 : 0.90181, 5.0454 : 0.79153, 5.11247 : 0.86137, 5.27426 : 0.010345}
+
+
+def WR104_gif(side_by_side=False):
+    
+    N = 200
+    phases = np.linspace(0.5, 1.5, N)
+    system = wrb.WR104.copy()
+    system['n_orbits'] = 3
+    system['inclination'] = 140
+    system['asc_node'] = 78
+    
+    # vmin, vmax = 0., 0.7
+    vmin, vmax = 0., 1.
+    
+    particles, weights = gm.gui_funcs[2](system)
+    X_orig, Y_orig, H = smooth_histogram2d(particles, weights, system)
+    H = gm.add_stars(X_orig[0, :], Y_orig[:, 0], H, system)
+    
+    fig, ax = plt.subplots(figsize=(6, 6))
+    
+    ax.pcolormesh(X_orig, Y_orig, H, cmap='hot', vmin=vmin, vmax=vmax, rasterized=True)
+    
+    ax.set(aspect='equal', xlabel='Relative RA (")', ylabel='Relative Dec (")')
+    
+    ax.set_axis_off()
+    fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+    
+    every = 1
+    length = 10
+    # now calculate some parameters for the animation frames and timing
+    frames = jnp.arange(0, N, every)    # iterable for the animation function. Chooses which frames (indices) to animate.
+    fps = len(frames) // length  # fps for the final animation
+    
+    import matplotlib
+
+    cmap = matplotlib.colormaps.get_cmap('hot')
+    
+    rgba = cmap(0.)
+    
+    def animate(i):
+        if i%(N // 10) == 0:
+            print(i/N * 100, "%", sep='')
+        ax.clear()
+        ax.set_facecolor(rgba)
+            
+        system['phase'] = phases[i]
+        particles, weights = gm.gui_funcs[2](system)
+        weights = np.array(weights)
+        weights[:len(weights)//2] /= 2
+        X, Y, H = smooth_histogram2d_w_bins(particles, weights, system, X_orig[0, :], Y_orig[:, 0])
+        # H = gm.add_stars(X[0, :], Y[:, 0], H, system)
+        
+        ax.pcolormesh(X, Y, H, cmap='hot', vmin=vmin, vmax=vmax, rasterized=True)
+        
+        ax.set(aspect='equal', xlabel='Relative RA (")', ylabel='Relative Dec (")')
+        ax.text(0.1, 0.155, rf"$\phi = {phases[i]%1:.2f}$", c='w', fontsize=20)
+        # ax.set(xlim=xlim, ylim=ylim)
+        return fig, 
+    
+    ani = animation.FuncAnimation(fig, animate, frames=frames, blit=True, repeat=False)
+    # writer = animation.FFMpegWriter(fps=fps)
+    ani.save("Images/WR104_evolution.gif", writer='ffmpeg', fps=fps)
+
+    if side_by_side:
+        system_2 = system.copy()
+        system_2['inclination'] = 180
+        
+        fig, [ax1, ax2] = plt.subplots(figsize=(12, 6), ncols=2, gridspec_kw={'hspace':0, 'wspace':0})
+        
+        for j, (ax, star) in enumerate(zip([ax1, ax2], [system_2, system])):
+            star['phase'] = phases[0]
+
+            particles, weights = gm.gui_funcs[2](star)
+            X_orig, Y_orig, H = smooth_histogram2d(particles, weights, star)
+            H = gm.add_stars(X_orig[0, :], Y_orig[:, 0], H, star)
+
+            ax.pcolormesh(X_orig, Y_orig, H, cmap='hot', vmin=vmin, vmax=vmax, rasterized=True)
+            
+            ax.set(aspect='equal', xlabel='Relative RA (")')
+
+            if j == 0:
+                ax.set_ylabel('Relative Dec (")')
+            
+            ax.set_axis_off()
+
+        fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+        
+        def animate(i):
+            if i%(N // 10) == 0:
+                print(i/N * 100, "%", sep='')
+            
+            for j, [ax, star] in enumerate(zip([ax1, ax2], [system_2, system])):
+                ax.clear()
+                ax.set_facecolor(rgba)
+                    
+                star['phase'] = phases[i]
+                particles, weights = gm.gui_funcs[2](star)
+                weights = np.array(weights)
+                weights[:len(weights)//2] /= 2
+                X, Y, H = smooth_histogram2d_w_bins(particles, weights, star, X_orig[0, :], Y_orig[:, 0])
+                # H = gm.add_stars(X[0, :], Y[:, 0], H, star)
+                
+                ax.pcolormesh(X, Y, H, cmap='hot', vmin=vmin, vmax=vmax, rasterized=True)
+                
+                ax.set(aspect='equal', xlabel='Relative RA (")')
+
+                if j == 0:
+                    ax.set_ylabel('Relative Dec (")')
+                else:
+                    ax.text(0.1, 0.155, rf"$\phi = {phases[i]%1:.2f}$", c='w', fontsize=20)
+            # ax.set(xlim=xlim, ylim=ylim)
+            return fig, 
+        
+        ani = animation.FuncAnimation(fig, animate, frames=frames, blit=True, repeat=False)
+        # writer = animation.FFMpegWriter(fps=fps)
+        ani.save("Images/WR104_evolution_side-by-side.gif", writer='ffmpeg', fps=fps)
+
     
 def main():
     # apep_plot('Apep_Plot')
@@ -2263,6 +2380,7 @@ def main():
     # poster_plot(transparent=True)
     
     # WR104_proposal_plot()
+    WR104_gif(side_by_side=True)
 
     # apep_orbit()
     
@@ -2272,7 +2390,7 @@ def main():
     # grain_size_exp_change()
     # plot_filters()
     
-    WR140_rt_lightcurve('rad_transfer/WR140/3.5_7', 'periastron_dense', shift=0, fileappend='_test7')
+    # WR140_rt_lightcurve('rad_transfer/WR140/3.5_7', 'periastron_dense', shift=0, fileappend='_test7')
 
 
 
